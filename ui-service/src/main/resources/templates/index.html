@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang='en' xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mandelbrot Set Visualization</title>
+    <link th:href="@{/styles/style.css}" rel="stylesheet"/>
+    <script type="text/javascript" th:src="@{/js/index.js}"></script>
+</head>
+<body>
+
+<header>
+    <p>Mandelbrot Set Visualization</p>
+</header>
+
+<section id="main">
+
+    <nav>
+        <form th:method="POST" th:action="@{/}" th:object="${mandelbrotSetParam}">
+
+            <label for="size">Size</label>
+            <br>
+            <input name="size" type="text" id="size" th:value="${size}">
+
+            <br>
+
+            <label for="xc">X Center</label>
+            <br>
+            <input name="xc" type="text" id="xc" th:value="${xc}">
+
+            <br>
+
+            <label for="yc">Y Center</label>
+            <br>
+            <input name="yc" type="text" id="yc" th:value="${yc}">
+
+            <br>
+
+            <label for="scale">Scale</label>
+            <br>
+            <input name="scale" type="text" id="scale" th:value="${scale}">
+
+            <br>
+
+            <label for="maxIterations">Max Iterations</label>
+            <br>
+            <input name="maxIterations" type="text" id="maxIterations" th:value="${maxIterations}">
+
+            <br>
+
+            <label for="subdivision">Subdivision</label>
+            <br>
+            <input name="subdivision" type="text" id="subdivision" th:value="${subdivision}">
+
+            <br>
+
+            <input class="myButton" type="submit" value="Process image">
+        </form>
+
+        <textarea id="console"></textarea>
+    </nav>
+
+    <section id="image-box">
+        <img id="image" th:src="${image}" alt="" src="">
+    </section>
+
+    <script th:inline="javascript">
+        let timeUrl = /*[[${timeUrl}]]*/;
+        console.log(timeUrl);
+
+        const consoleArea = document.getElementById('console');
+        const image = document.getElementById('image');
+
+        image.onload = function () {
+            myFunction();
+        }
+
+        async function myFunction() {
+            console.log(timeUrl);
+            const response = await fetch("http://" + timeUrl + "/getLogMessages");
+
+            response.text().then(function (text) {
+                consoleArea.value = text;
+            });
+        }
+
+    </script>
+
+</section>
+
+</body>
+</html>

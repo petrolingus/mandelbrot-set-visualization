@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: process-service
+  labels:
+    app.kubernetes.io/name: process-service
+spec:
+  replicas: 8
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: process-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: process-service
+    spec:
+      containers:
+        - name: process-service
+          image: petrolingus/process-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "512Mi"

@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui-service
+  labels:
+    app.kubernetes.io/name: ui-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ui-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ui-service
+    spec:
+      containers:
+        - name: ui-service
+          image: petrolingus/ui-service:latest
+          imagePullPolicy: Always
+          env:
+            - name: PROCESS_SERVICE_URL
+              value: process-service:8080
+            - name: LOG_URL
+              value: localhost:8080
+          ports:
+            - containerPort: 8080
