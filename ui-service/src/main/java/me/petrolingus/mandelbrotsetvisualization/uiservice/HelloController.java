@@ -1,6 +1,7 @@
 package me.petrolingus.mandelbrotsetvisualization.uiservice;
 
 import jakarta.annotation.PostConstruct;
+import me.petrolingus.mandelbrotsetvisualization.dao.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,20 +19,19 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Controller
 public class HelloController {
 
-    Logger logger = LoggerFactory.getLogger(HelloController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HelloController.class);
 
     final RestTemplate restTemplate;
+    final PoolController poolController;
 
     @Value("${processServiceUrl}")
     String processServiceUrl;
@@ -45,8 +45,9 @@ public class HelloController {
 
     private static BufferedImage plugImage;
 
-    public HelloController(RestTemplate restTemplate) {
+    public HelloController(RestTemplate restTemplate, PoolController poolController) {
         this.restTemplate = restTemplate;
+        this.poolController = poolController;
     }
 
     @PostConstruct
@@ -99,27 +100,21 @@ public class HelloController {
                                          @RequestParam int subdivision
     ) throws IOException, InterruptedException, ExecutionException {
 
-        if (subdivision > 6) {
-            subdivision = 6;
-        }
-
-        logger.info("start process:");
-
-        long start = System.nanoTime();
-
-        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+//        if (subdivision > 6) {
+//            subdivision = 6;
+//        }
+//
+//        logger.info("start process:");
+//
+//        long start = System.nanoTime();
 
         final int tilesInRow = (int) Math.pow(2, subdivision);
         final int tilesCount = tilesInRow * tilesInRow;
         final int tileSize = size / tilesInRow;
-
         final double tileScale = scale / tilesInRow;
 
-        String prefix = "http://" + processServiceUrl + "/mandelbrot";
+        poolController.schedule(size);
 
-        AtomicInteger processed = new AtomicInteger();
-
-        List<Callable<TileInfo>> tasks = new ArrayList<>();
         for (int i = 0; i < tilesInRow; i++) {
             int y = i * tileSize;
             for (int j = 0; j < tilesInRow; j++) {
@@ -128,41 +123,21 @@ public class HelloController {
                 double xcTile = (xc + j * tileScale) - (tilesInRow / 2.0 - 0.5) * tileScale;
                 double ycTile = (yc - i * tileScale) + (tilesInRow / 2.0 - 0.5) * tileScale;
 
-                StringBuilder url = new StringBuilder(prefix + "?size=" + tileSize)
-                        .append("&xc=").append(xcTile)
-                        .append("&yc=").append(ycTile)
-                        .append("&scale=").append(tileScale)
-                        .append("&maxIterations=").append(maxIterations);
-
-                tasks.add(() -> {
-                    while (true) {
-                        try {
-                            int[] pixels = restTemplate.getForEntity(url.toString(), int[].class).getBody();
-                            logger.info("Processed {}/{}", processed.incrementAndGet(), tilesCount);
-                            return new TileInfo(x, y, pixels);
-                        } catch (RestClientException e) {
-                            // TODO: process exception
-                        }
-                    }
-                });
+                UUID uuid = UUID.randomUUID();
+                Task task = new Task(uuid, tileSize, xcTile, ycTile, tileScale, maxIterations, x, y);
+                poolController.add(task);
             }
         }
 
-        List<Future<TileInfo>> futures = executorService.invokeAll(tasks);
-
-        for (Future<TileInfo> future : futures) {
-            TileInfo tileInfo = future.get();
-            image.setRGB(tileInfo.x(), tileInfo.y(), tileSize, tileSize, tileInfo.pixels(), 0, tileSize);
-        }
-
+        BufferedImage image = poolController.getResult();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ImageIO.write(image, "png", os);
         InputStream in = new ByteArrayInputStream(os.toByteArray());
 
-        long stop = System.nanoTime();
-        Duration took = Duration.of(stop - start, ChronoUnit.NANOS);
-
-        stringBuilder.append(Instant.now().truncatedTo(ChronoUnit.MILLIS)).append(':').append(" Process image took: ").append(took.toMillis()).append("ms\n");
+//        long stop = System.nanoTime();
+//        Duration took = Duration.of(stop - start, ChronoUnit.NANOS);
+//
+//        stringBuilder.append(Instant.now().truncatedTo(ChronoUnit.MILLIS)).append(':').append(" Process image took: ").append(took.toMillis()).append("ms\n");
 
         return in.readAllBytes();
     }
