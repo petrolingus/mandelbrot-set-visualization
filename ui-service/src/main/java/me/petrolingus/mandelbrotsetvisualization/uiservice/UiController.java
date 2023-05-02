@@ -1,6 +1,5 @@
 package me.petrolingus.mandelbrotsetvisualization.uiservice;
 
-import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,46 +17,30 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Controller
-public class HelloController {
+public class UiController {
 
-    Logger logger = LoggerFactory.getLogger(HelloController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UiController.class);
 
-    final RestTemplate restTemplate;
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
+
+    private final RestTemplate restTemplate;
 
     @Value("${processServiceUrl}")
-    String processServiceUrl;
+    private String processServiceUrl;
 
-    @Value("${logUrl}")
-    String logUrl;
-
-    private static final StringBuilder stringBuilder = new StringBuilder();
-
-    private static final ExecutorService executorService = Executors.newCachedThreadPool();
-
-    private static BufferedImage plugImage;
-
-    public HelloController(RestTemplate restTemplate) {
+    public UiController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-    @PostConstruct
-    public void init() {
-        System.out.println(processServiceUrl);
-        plugImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
-        plugImage.setRGB(0, 0, Color.WHITE.getRGB());
-    }
-
     @GetMapping("/")
-    public String hello(Model model) {
+    public String index(Model model) {
         model.addAttribute("size", 1024);
         model.addAttribute("xc", -1.0);
         model.addAttribute("yc", 0.0);
@@ -65,12 +48,11 @@ public class HelloController {
         model.addAttribute("maxIterations", 512);
         model.addAttribute("subdivision", 5);
         model.addAttribute("image", "/get-plug-image");
-        model.addAttribute("timeUrl", logUrl);
         return "index";
     }
 
     @PostMapping("/")
-    public String hello(@ModelAttribute("mandelbrotSetParam") MandelbrotSetParam mandelbrotSetParam, Model model) {
+    public String index(@ModelAttribute("mandelbrotSetParam") MandelbrotSetParam mandelbrotSetParam, Model model) {
         model.addAttribute("size", mandelbrotSetParam.getSize());
         model.addAttribute("xc", mandelbrotSetParam.getXc());
         model.addAttribute("yc", mandelbrotSetParam.getYc());
@@ -78,12 +60,13 @@ public class HelloController {
         model.addAttribute("maxIterations", mandelbrotSetParam.getMaxIterations());
         model.addAttribute("subdivision", mandelbrotSetParam.getSubdivision());
         model.addAttribute("image", "/get-image" + mandelbrotSetParam);
-        model.addAttribute("timeUrl", logUrl);
         return "index";
     }
 
     @GetMapping(value = "get-plug-image", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody byte[] getPlugImage() throws IOException {
+        BufferedImage plugImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+        plugImage.setRGB(0, 0, Color.WHITE.getRGB());
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ImageIO.write(plugImage, "png", os);
         InputStream in = new ByteArrayInputStream(os.toByteArray());
@@ -97,29 +80,16 @@ public class HelloController {
                                          @RequestParam double scale,
                                          @RequestParam int maxIterations,
                                          @RequestParam int subdivision
-    ) throws IOException, InterruptedException, ExecutionException {
-
-        if (subdivision > 6) {
-            subdivision = 6;
-        }
-
-        logger.info("start process:");
-
-        long start = System.nanoTime();
-
-        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+    ) throws IOException, InterruptedException {
 
         final int tilesInRow = (int) Math.pow(2, subdivision);
         final int tilesCount = tilesInRow * tilesInRow;
         final int tileSize = size / tilesInRow;
-
         final double tileScale = scale / tilesInRow;
 
-        String prefix = "http://" + processServiceUrl + "/mandelbrot";
+        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 
-        AtomicInteger processed = new AtomicInteger();
-
-        List<Callable<TileInfo>> tasks = new ArrayList<>();
+        List<Callable<Void>> tasks = new ArrayList<>();
         for (int i = 0; i < tilesInRow; i++) {
             int y = i * tileSize;
             for (int j = 0; j < tilesInRow; j++) {
@@ -128,18 +98,14 @@ public class HelloController {
                 double xcTile = (xc + j * tileScale) - (tilesInRow / 2.0 - 0.5) * tileScale;
                 double ycTile = (yc - i * tileScale) + (tilesInRow / 2.0 - 0.5) * tileScale;
 
-                StringBuilder url = new StringBuilder(prefix + "?size=" + tileSize)
-                        .append("&xc=").append(xcTile)
-                        .append("&yc=").append(ycTile)
-                        .append("&scale=").append(tileScale)
-                        .append("&maxIterations=").append(maxIterations);
+                String url = urlGenerator(tileSize, xcTile, ycTile, tileScale, maxIterations);
 
                 tasks.add(() -> {
                     while (true) {
                         try {
-                            int[] pixels = restTemplate.getForEntity(url.toString(), int[].class).getBody();
-                            logger.info("Processed {}/{}", processed.incrementAndGet(), tilesCount);
-                            return new TileInfo(x, y, pixels);
+                            int[] pixels = restTemplate.getForObject(url, int[].class);
+                            image.setRGB(x, y, tileSize, tileSize, pixels, 0, tileSize);
+                            return null;
                         } catch (RestClientException e) {
                             // TODO: process exception
                         }
@@ -148,27 +114,22 @@ public class HelloController {
             }
         }
 
-        List<Future<TileInfo>> futures = executorService.invokeAll(tasks);
-
-        for (Future<TileInfo> future : futures) {
-            TileInfo tileInfo = future.get();
-            image.setRGB(tileInfo.x(), tileInfo.y(), tileSize, tileSize, tileInfo.pixels(), 0, tileSize);
-        }
+        EXECUTOR_SERVICE.invokeAll(tasks);
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ImageIO.write(image, "png", os);
         InputStream in = new ByteArrayInputStream(os.toByteArray());
 
-        long stop = System.nanoTime();
-        Duration took = Duration.of(stop - start, ChronoUnit.NANOS);
-
-        stringBuilder.append(Instant.now().truncatedTo(ChronoUnit.MILLIS)).append(':').append(" Process image took: ").append(took.toMillis()).append("ms\n");
-
         return in.readAllBytes();
     }
 
-    @GetMapping(value = "getLogMessages", produces = MediaType.TEXT_PLAIN_VALUE)
-    public @ResponseBody String getLogMessages() {
-        return stringBuilder.toString();
+    @Value("${processServiceUrl}")
+    private String urlGenerator(int size, double xc, double yc, double scale, int iterations) {
+        return processServiceUrl +
+                "?size=" + size +
+                "&xc=" + xc +
+                "&yc=" + yc +
+                "&scale=" + scale +
+                "&maxIterations=" + iterations;
     }
 }
