@@ -1,7 +1,7 @@
 package me.petrolingus.mandelbrotsetvisualization.uiservice;
 
-import me.petrolingus.mandelbrotsetvisualization.dao.CompletedTask;
 import me.petrolingus.mandelbrotsetvisualization.dao.Task;
+import me.petrolingus.mandelbrotsetvisualization.dao.Tile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,7 @@ public class PoolController {
     private final Queue<Task> progress = new ConcurrentLinkedQueue<>();
     private final Queue<TileInfo> done = new ConcurrentLinkedQueue<>();
 
-    AtomicInteger processed = new AtomicInteger();
+    AtomicInteger numberOfTasks = new AtomicInteger();
 
     private BufferedImage bufferedImage;
 
@@ -31,28 +31,56 @@ public class PoolController {
         // 1. Get SCHEDULED task
         // 2. Get IN_PROGRESS task
 
-        return schedule.poll();
+        if (numberOfTasks.get() == 0) {
+            return null;
+        }
+
+        Task task = schedule.poll();
+
+        if (task == null) {
+            schedule.addAll(progress);
+            task = schedule.poll();
+            progress.add(task);
+        } else {
+            progress.add(task);
+        }
+
+        if (schedule.size() != 0 || progress.size() != 0) {
+            System.out.println(schedule.size() + ":" + progress.size());
+        }
+
+
+        return task;
     }
 
     @PostMapping("tasks")
-    public ResponseEntity<String> completeTask(@RequestBody CompletedTask task) {
-        bufferedImage.setRGB(task.x(), task.y(), task.tileSize(), task.tileSize(), task.data(), 0, task.tileSize());
-        processed.decrementAndGet();
+    public ResponseEntity<String> completeTask(@RequestBody Task task) {
+
+        if (!progress.remove(task)) {
+            return ResponseEntity.ok().build();
+        }
+
+        Tile tile = task.tile();
+
+        bufferedImage.setRGB(tile.x(), tile.y(), tile.size(), tile.size(), tile.data(), 0, tile.size());
+        numberOfTasks.decrementAndGet();
         return ResponseEntity.ok().build();
     }
 
     public void add(Task task) {
-        processed.incrementAndGet();
+        numberOfTasks.incrementAndGet();
         schedule.add(task);
     }
 
     public void schedule(int size) {
         bufferedImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+        schedule.clear();
+        progress.clear();
     }
 
     public BufferedImage getResult() {
 
-        while (processed.get() > 0) {
+        while (numberOfTasks.get() > 0) {
             Thread.onSpinWait();
         }
 

@@ -3,7 +3,9 @@ package me.petrolingus.mandelbrotsetvisualization.processservice;
 import ch.qos.logback.core.util.TimeUtil;
 import jakarta.annotation.PostConstruct;
 import me.petrolingus.mandelbrotsetvisualization.dao.CompletedTask;
+import me.petrolingus.mandelbrotsetvisualization.dao.Params;
 import me.petrolingus.mandelbrotsetvisualization.dao.Task;
+import me.petrolingus.mandelbrotsetvisualization.dao.Tile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -68,14 +70,19 @@ public class ImageService {
 
                 // Make task
                 long start = System.currentTimeMillis();
-                int[] mandelbrotImage = mandelbrot.getMandelbrotImage(task.size(), task.xc(), task.yc(), task.scale(), task.iterations(), hue, saturation);
+                Params params = task.params();
+                int[] mandelbrotImage = mandelbrot.getMandelbrotImage(params.size(), params.xc(), params.yc(), params.scale(), params.iterations(), hue, saturation);
                 long stop = System.currentTimeMillis();
 
                 LOGGER.info("Task {} completed in {} ms", task.uuid().toString(), (stop - start));
 
                 // Create the request body by wrapping the object in HttpEntity
-                CompletedTask completedTask = new CompletedTask(task.uuid(), mandelbrotImage, task.x(), task.y(), task.size());
-                HttpEntity<CompletedTask> request = new HttpEntity<>(completedTask);
+                Tile tile = task.tile();
+                Task result = new Task(task.uuid(), null, new Tile(tile.x(), tile.y(), tile.size(), mandelbrotImage));
+                HttpEntity<Task> request = new HttpEntity<>(result);
+
+//                CompletedTask completedTask = new CompletedTask(task.uuid(), mandelbrotImage, task.x(), task.y(), task.size());
+//                HttpEntity<CompletedTask> request = new HttpEntity<>(completedTask);
 
                 // Send the request body in HttpEntity for HTTP POST request
                 restTemplate.postForObject(url, request, String.class);

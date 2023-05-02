@@ -1,7 +1,9 @@
 package me.petrolingus.mandelbrotsetvisualization.uiservice;
 
 import jakarta.annotation.PostConstruct;
+import me.petrolingus.mandelbrotsetvisualization.dao.Params;
 import me.petrolingus.mandelbrotsetvisualization.dao.Task;
+import me.petrolingus.mandelbrotsetvisualization.dao.Tile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -124,7 +126,9 @@ public class HelloController {
                 double ycTile = (yc - i * tileScale) + (tilesInRow / 2.0 - 0.5) * tileScale;
 
                 UUID uuid = UUID.randomUUID();
-                Task task = new Task(uuid, tileSize, xcTile, ycTile, tileScale, maxIterations, x, y);
+                Params params = new Params(tileSize, xcTile, ycTile, tileScale, maxIterations);
+                Tile tile = new Tile(x, y, tileSize, null);
+                Task task = new Task(uuid, params, tile);
                 poolController.add(task);
             }
         }
