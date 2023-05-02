@@ -1,8 +1,6 @@
 package me.petrolingus.mandelbrotsetvisualization.processservice;
 
-import ch.qos.logback.core.util.TimeUtil;
 import jakarta.annotation.PostConstruct;
-import me.petrolingus.mandelbrotsetvisualization.dao.CompletedTask;
 import me.petrolingus.mandelbrotsetvisualization.dao.Params;
 import me.petrolingus.mandelbrotsetvisualization.dao.Task;
 import me.petrolingus.mandelbrotsetvisualization.dao.Tile;
@@ -12,17 +10,11 @@ import org.springframework.http.HttpEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 @EnableScheduling
@@ -81,12 +73,8 @@ public class ImageService {
                 Task result = new Task(task.uuid(), null, new Tile(tile.x(), tile.y(), tile.size(), mandelbrotImage));
                 HttpEntity<Task> request = new HttpEntity<>(result);
 
-//                CompletedTask completedTask = new CompletedTask(task.uuid(), mandelbrotImage, task.x(), task.y(), task.size());
-//                HttpEntity<CompletedTask> request = new HttpEntity<>(completedTask);
-
                 // Send the request body in HttpEntity for HTTP POST request
                 restTemplate.postForObject(url, request, String.class);
-
             });
         }
     }
