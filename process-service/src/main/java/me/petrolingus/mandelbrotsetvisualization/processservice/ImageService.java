@@ -44,10 +44,10 @@ public class ImageService {
     }
 
     @GetMapping("/probes/ready")
-    private @ResponseBody ResponseEntity<?> ready() {
-        if (inProgress.get() > 10) {
-            return ResponseEntity.status(500).build();
-        }
-        return ResponseEntity.status(200).build();
+    private @ResponseBody String ready() {
+//        if (inProgress.get() > 10) {
+//            return ResponseEntity.status(500).build();
+//        }
+        return "READY";
     }
 }
