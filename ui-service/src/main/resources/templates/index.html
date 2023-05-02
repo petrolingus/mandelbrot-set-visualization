@@ -56,34 +56,34 @@
             <input class="myButton" type="submit" value="Process image">
         </form>
 
-        <textarea id="console"></textarea>
+<!--        <textarea id="console"></textarea>-->
     </nav>
 
     <section id="image-box">
         <img id="image" th:src="${image}" alt="" src="">
     </section>
 
-    <script th:inline="javascript">
-        let timeUrl = /*[[${timeUrl}]]*/;
-        console.log(timeUrl);
+<!--    <script th:inline="javascript">-->
+<!--        let timeUrl = /*[[${timeUrl}]]*/;-->
+<!--        console.log(timeUrl);-->
 
-        const consoleArea = document.getElementById('console');
-        const image = document.getElementById('image');
+<!--        const consoleArea = document.getElementById('console');-->
+<!--        const image = document.getElementById('image');-->
 
-        image.onload = function () {
-            myFunction();
-        }
+<!--        image.onload = function () {-->
+<!--            myFunction();-->
+<!--        }-->
 
-        async function myFunction() {
-            console.log(timeUrl);
-            const response = await fetch("http://" + timeUrl + "/getLogMessages");
+<!--        async function myFunction() {-->
+<!--            console.log(timeUrl);-->
+<!--            const response = await fetch("http://" + timeUrl + "/getLogMessages");-->
 
-            response.text().then(function (text) {
-                consoleArea.value = text;
-            });
-        }
+<!--            response.text().then(function (text) {-->
+<!--                consoleArea.value = text;-->
+<!--            });-->
+<!--        }-->
 
-    </script>
+<!--    </script>-->
 
 </section>
 
