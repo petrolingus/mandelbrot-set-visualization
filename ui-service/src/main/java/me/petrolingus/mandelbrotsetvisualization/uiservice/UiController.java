@@ -122,7 +122,6 @@ public class UiController {
         return in.readAllBytes();
     }
 
-    @Value("${processServiceUrl}")
     private String urlGenerator(int size, double xc, double yc, double scale, int iterations) {
         return processServiceUrl +
                 "?size=" + size +
