@@ -1,11 +1,9 @@
 package me.petrolingus.mandelbrotsetvisualization.processservice;
 
 import org.apache.commons.math3.util.FastMath;
-import org.springframework.stereotype.Component;
 
 import java.awt.*;
 
-@Component
 public class Mandelbrot {
 
     public double calculatePixel(double x, double y, int maxIterations) {

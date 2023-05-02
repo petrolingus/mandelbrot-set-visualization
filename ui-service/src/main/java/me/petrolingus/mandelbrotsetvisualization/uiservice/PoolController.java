@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -27,60 +28,28 @@ public class PoolController {
 
     @GetMapping("tasks")
     public @ResponseBody Task getTask() {
-
-        if (numberOfTasks.get() <= 0) {
-            return null;
-        }
-
-        LOGGER.info("Scheduled: {}, In progress: {}, Number of tasks: {}", schedule.size(), progress.size(), numberOfTasks.get());
-
         Task task = schedule.poll();
-
-        if (task == null) {
-            LOGGER.info("No scheduled tasks. In progress tasks: {}", progress.size());
-            schedule.addAll(progress);
-            LOGGER.info("Put all in progress tasks to schedule. Scheduled tasks: {}", schedule.size());
-            task = schedule.poll();
-        }
-
-        if (task == null) {
-            LOGGER.info("Take null task!!");
-        }
-
-        if (task != null) {
-            LOGGER.info("Send task: {}", task.uuid());
-            progress.add(task);
-        }
-
         return task;
     }
 
     @PostMapping("tasks")
     public ResponseEntity<String> completeTask(@RequestBody Task task) {
-
-        LOGGER.info("Completed task: {}", task.uuid());
-
-        if (!progress.removeIf(task1 -> task1.uuid().equals(task.uuid()))) {
-            LOGGER.info("progress size: {}, uuid: {}", progress.size(), task.uuid());
-            return ResponseEntity.ok().build();
-        }
-
         Tile tile = task.tile();
-
         bufferedImage.setRGB(tile.x(), tile.y(), tile.size(), tile.size(), tile.data(), 0, tile.size());
         numberOfTasks.decrementAndGet();
         return ResponseEntity.ok().build();
     }
 
-    public void add(Task task) {
-        numberOfTasks.incrementAndGet();
-        schedule.add(task);
+    public void add(List<Task> tasks) {
+        numberOfTasks.set(tasks.size());
+        schedule.addAll(tasks);
     }
 
     public void schedule(int size) {
+        long start = System.currentTimeMillis();
         bufferedImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
-        schedule.clear();
-        progress.clear();
+        long stop = System.currentTimeMillis();
+        LOGGER.info("Scheduling completed in {}ms", (stop - start));
     }
 
     public BufferedImage getResult() {

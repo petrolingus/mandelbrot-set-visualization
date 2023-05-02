@@ -19,6 +19,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
 
@@ -104,6 +106,7 @@ public class UiController {
 
         poolController.schedule(size);
 
+        List<Task> tasks = new ArrayList<>();
         for (int i = 0; i < tilesInRow; i++) {
             int y = i * tileSize;
             for (int j = 0; j < tilesInRow; j++) {
@@ -115,10 +118,11 @@ public class UiController {
                 UUID uuid = UUID.randomUUID();
                 Params params = new Params(tileSize, xcTile, ycTile, tileScale, maxIterations);
                 Tile tile = new Tile(x, y, tileSize, null);
-                Task task = new Task(uuid, params, tile);
-                poolController.add(task);
+                tasks.add(new Task(uuid, params, tile));
             }
         }
+
+        poolController.add(tasks);
 
         BufferedImage image = poolController.getResult();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
