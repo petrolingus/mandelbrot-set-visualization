@@ -11,8 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -21,46 +19,35 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Controller
-public class HelloController {
+public class UiController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HelloController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UiController.class);
 
-    final RestTemplate restTemplate;
     final PoolController poolController;
-
-    @Value("${processServiceUrl}")
-    String processServiceUrl;
 
     @Value("${logUrl}")
     String logUrl;
 
     private static final StringBuilder stringBuilder = new StringBuilder();
 
-    private static final ExecutorService executorService = Executors.newCachedThreadPool();
-
     private static BufferedImage plugImage;
 
-    public HelloController(RestTemplate restTemplate, PoolController poolController) {
-        this.restTemplate = restTemplate;
+    public UiController(PoolController poolController) {
         this.poolController = poolController;
     }
 
     @PostConstruct
     public void init() {
-        System.out.println(processServiceUrl);
         plugImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
         plugImage.setRGB(0, 0, Color.WHITE.getRGB());
     }
 
     @GetMapping("/")
-    public String hello(Model model) {
+    public String index(Model model) {
         model.addAttribute("size", 1024);
         model.addAttribute("xc", -1.0);
         model.addAttribute("yc", 0.0);
@@ -73,7 +60,7 @@ public class HelloController {
     }
 
     @PostMapping("/")
-    public String hello(@ModelAttribute("mandelbrotSetParam") MandelbrotSetParam mandelbrotSetParam, Model model) {
+    public String index(@ModelAttribute("mandelbrotSetParam") MandelbrotSetParam mandelbrotSetParam, Model model) {
         model.addAttribute("size", mandelbrotSetParam.getSize());
         model.addAttribute("xc", mandelbrotSetParam.getXc());
         model.addAttribute("yc", mandelbrotSetParam.getYc());
