@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RestController
 public class PoolController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HelloController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PoolController.class);
 
     private final Queue<Task> schedule = new ConcurrentLinkedQueue<>();
     private final Queue<Task> progress = new ConcurrentLinkedQueue<>();
