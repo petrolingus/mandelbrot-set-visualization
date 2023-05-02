@@ -1,11 +1,12 @@
 package me.petrolingus.mandelbrotsetvisualization.processservice;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
 public class ImageService {
@@ -15,6 +16,8 @@ public class ImageService {
     private final float hue;
 
     private final float saturation;
+
+    private final AtomicInteger inProgress = new AtomicInteger();
 
     public ImageService(Mandelbrot mandelbrot) {
         this.mandelbrot = mandelbrot;
@@ -29,7 +32,10 @@ public class ImageService {
                                         @RequestParam double scale,
                                         @RequestParam int maxIterations
     ) {
-        return mandelbrot.getMandelbrotImage(size, xc, yc, scale, maxIterations, hue, saturation);
+        inProgress.incrementAndGet();
+        int[] mandelbrotImage = mandelbrot.getMandelbrotImage(size, xc, yc, scale, maxIterations, hue, saturation);
+        inProgress.decrementAndGet();
+        return mandelbrotImage;
     }
 
     @GetMapping("/probes/live")
@@ -38,7 +44,10 @@ public class ImageService {
     }
 
     @GetMapping("/probes/ready")
-    private @ResponseBody String ready() {
-        return "READY";
+    private @ResponseBody ResponseEntity<?> ready() {
+        if (inProgress.get() > 10) {
+            return ResponseEntity.status(500).build();
+        }
+        return ResponseEntity.status(200).build();
     }
 }
