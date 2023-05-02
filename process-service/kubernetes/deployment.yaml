@@ -31,14 +31,14 @@ spec:
           livenessProbe:
             httpGet:
               path: /probes/live
-              port: web
+              port: 8080
               scheme: HTTP
             initialDelaySeconds: 10
             periodSeconds: 1
           readinessProbe:
             httpGet:
               path: /probes/ready
-              port: web
+              port: 8080
               scheme: HTTP
             initialDelaySeconds: 10
             periodSeconds: 1
