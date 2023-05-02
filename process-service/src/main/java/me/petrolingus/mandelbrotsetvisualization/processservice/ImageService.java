@@ -38,16 +38,16 @@ public class ImageService {
         return mandelbrotImage;
     }
 
-    @GetMapping("/probes/live")
-    private @ResponseBody String live() {
-        return "ALIVE";
-    }
-
-    @GetMapping("/probes/ready")
-    private @ResponseBody String ready() {
-//        if (inProgress.get() > 10) {
-//            return ResponseEntity.status(500).build();
-//        }
-        return "READY";
-    }
+//    @GetMapping("/probes/live")
+//    private @ResponseBody String live() {
+//        return "ALIVE";
+//    }
+//
+//    @GetMapping("/probes/ready")
+//    private @ResponseBody String ready() {
+////        if (inProgress.get() > 10) {
+////            return ResponseEntity.status(500).build();
+////        }
+//        return "READY";
+//    }
 }
