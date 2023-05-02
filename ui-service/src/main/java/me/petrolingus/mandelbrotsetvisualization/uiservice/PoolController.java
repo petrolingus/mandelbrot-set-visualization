@@ -19,7 +19,6 @@ public class PoolController {
 
     private final Queue<Task> schedule = new ConcurrentLinkedQueue<>();
     private final Queue<Task> progress = new ConcurrentLinkedQueue<>();
-    private final Queue<TileInfo> done = new ConcurrentLinkedQueue<>();
 
     AtomicInteger numberOfTasks = new AtomicInteger();
 
