@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
@@ -23,7 +22,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Controller
+@@RestController
 public class UiController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UiController.class);
@@ -47,7 +46,7 @@ public class UiController {
         model.addAttribute("scale", 2.0);
         model.addAttribute("maxIterations", 512);
         model.addAttribute("subdivision", 5);
-        model.addAttribute("image", "/get-plug-image");
+        model.addAttribute("image", "/api/v1/get-plug-image");
         return "index";
     }
 
@@ -59,11 +58,11 @@ public class UiController {
         model.addAttribute("scale", mandelbrotSetParam.getScale());
         model.addAttribute("maxIterations", mandelbrotSetParam.getMaxIterations());
         model.addAttribute("subdivision", mandelbrotSetParam.getSubdivision());
-        model.addAttribute("image", "/get-image" + mandelbrotSetParam);
+        model.addAttribute("image", "/api/v1/get-mandelbrot-image" + mandelbrotSetParam);
         return "index";
     }
 
-    @GetMapping(value = "get-plug-image", produces = MediaType.IMAGE_PNG_VALUE)
+    @GetMapping(value = "/api/v1/get-plug-image", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody byte[] getPlugImage() throws IOException {
         BufferedImage plugImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
         plugImage.setRGB(0, 0, Color.WHITE.getRGB());
@@ -73,13 +72,13 @@ public class UiController {
         return in.readAllBytes();
     }
 
-    @GetMapping(value = "get-image", produces = MediaType.IMAGE_PNG_VALUE)
-    public @ResponseBody byte[] getImage(@RequestParam int size,
-                                         @RequestParam double xc,
-                                         @RequestParam double yc,
-                                         @RequestParam double scale,
-                                         @RequestParam int maxIterations,
-                                         @RequestParam int subdivision
+    @GetMapping(value = "/api/v1/get-mandelbrot-image", produces = MediaType.IMAGE_PNG_VALUE)
+    public @ResponseBody byte[] getMandelbrotImage(@RequestParam int size,
+                                                   @RequestParam double xc,
+                                                   @RequestParam double yc,
+                                                   @RequestParam double scale,
+                                                   @RequestParam int maxIterations,
+                                                   @RequestParam int subdivision
     ) throws IOException, InterruptedException {
 
         final int tilesInRow = (int) Math.pow(2, subdivision);
@@ -107,7 +106,7 @@ public class UiController {
                             image.setRGB(x, y, tileSize, tileSize, pixels, 0, tileSize);
                             return null;
                         } catch (RestClientException e) {
-                            // TODO: process exception
+                            LOGGER.info(e.toString());
                         }
                     }
                 });
