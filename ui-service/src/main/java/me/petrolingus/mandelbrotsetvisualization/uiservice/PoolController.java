@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.awt.image.BufferedImage;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
@@ -27,27 +28,29 @@ public class PoolController {
     @GetMapping("tasks")
     public @ResponseBody Task getTask() {
 
-        // 1. Get SCHEDULED task
-        // 2. Get IN_PROGRESS task
-
-        if (numberOfTasks.get() == 0) {
+        if (numberOfTasks.get() <= 0) {
             return null;
         }
+
+        LOGGER.info("Scheduled: {}, In progress: {}, Number of tasks: {}", schedule.size(), progress.size(), numberOfTasks.get());
 
         Task task = schedule.poll();
 
         if (task == null) {
+            LOGGER.info("No scheduled tasks. In progress tasks: {}", progress.size());
             schedule.addAll(progress);
+            LOGGER.info("Put all in progress tasks to schedule. Scheduled tasks: {}", schedule.size());
             task = schedule.poll();
-            progress.add(task);
-        } else {
-            progress.add(task);
         }
 
-        if (schedule.size() != 0 || progress.size() != 0) {
-            System.out.println(schedule.size() + ":" + progress.size());
+        if (task == null) {
+            LOGGER.info("Take null task!!");
         }
 
+        if (task != null) {
+            LOGGER.info("Send task: {}", task.uuid());
+            progress.add(task);
+        }
 
         return task;
     }
@@ -55,7 +58,10 @@ public class PoolController {
     @PostMapping("tasks")
     public ResponseEntity<String> completeTask(@RequestBody Task task) {
 
-        if (!progress.remove(task)) {
+        LOGGER.info("Completed task: {}", task.uuid());
+
+        if (!progress.removeIf(task1 -> task1.uuid().equals(task.uuid()))) {
+            LOGGER.info("progress size: {}, uuid: {}", progress.size(), task.uuid());
             return ResponseEntity.ok().build();
         }
 
@@ -79,9 +85,13 @@ public class PoolController {
 
     public BufferedImage getResult() {
 
+        long start = System.currentTimeMillis();
         while (numberOfTasks.get() > 0) {
             Thread.onSpinWait();
         }
+        long stop = System.currentTimeMillis();
+
+        LOGGER.info("Image generation took {}ms", (stop - start));
 
         return bufferedImage;
     }
