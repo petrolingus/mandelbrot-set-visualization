@@ -22,7 +22,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@@RestController
+@RestController
 public class UiController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UiController.class);
