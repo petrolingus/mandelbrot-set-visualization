@@ -1,4 +1,4 @@
-FROM openjdk:17-alpine
+FROM openjdk:19
 
 ENV APP_JAR="ui-service-0.0.1-SNAPSHOT.jar"
 
