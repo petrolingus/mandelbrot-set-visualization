@@ -18,10 +18,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 @Controller
 public class UiController {
@@ -82,12 +86,17 @@ public class UiController {
                                                    @RequestParam int subdivision
     ) throws IOException, InterruptedException {
 
+        LOGGER.info("Task with UUID-{}", UUID.randomUUID());
+
         final int tilesInRow = (int) Math.pow(2, subdivision);
         final int tilesCount = tilesInRow * tilesInRow;
         final int tileSize = size / tilesInRow;
         final double tileScale = scale / tilesInRow;
 
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+
+        AtomicInteger atomicInteger = new AtomicInteger();
+        AtomicInteger retriedInteger = new AtomicInteger();
 
         List<Callable<Void>> tasks = new ArrayList<>();
         for (int i = 0; i < tilesInRow; i++) {
@@ -100,21 +109,46 @@ public class UiController {
 
                 String url = urlGenerator(tileSize, xcTile, ycTile, tileScale, maxIterations);
 
+                int index = i * tilesInRow + j;
+
                 tasks.add(() -> {
+                    int retried = 0;
                     while (true) {
+                        long start = System.currentTimeMillis();
                         try {
+                            atomicInteger.incrementAndGet();
                             int[] pixels = restTemplate.getForObject(url, int[].class);
+                            long stop = System.currentTimeMillis();
+                            LOGGER.info("Chunk {} with size {} generated within {}ms", index, tileScale, (stop - start));
+
                             image.setRGB(x, y, tileSize, tileSize, pixels, 0, tileSize);
-                            return null;
-                        } catch (RestClientException e) {
+
+//                            Graphics2D graphics2D = image.createGraphics();
+//                            Color decode = Color.decode(Integer.toString(pixels[pixels.length / 2]));
+//                            Color color = new Color(255 - decode.getRed(), 255 - decode.getGreen(),
+//                                    255 - decode.getBlue());
+//                            graphics2D.setColor(color);
+//                            graphics2D.setFont(new Font("Arial Black", Font.BOLD, tileSize / 4));
+//                            graphics2D.drawString(Integer.toString(index), x + tileSize / 2, y + tileSize / 2);
+
+                            break;
+                        } catch (Throwable e) {
+                            long stop = System.currentTimeMillis();
+                            LOGGER.info("Chunk {} NOT GENERATED! Response time {}ms", index, (stop - start));
                             LOGGER.info(e.toString());
+                            retried++;
                         }
                     }
+                    retriedInteger.addAndGet(retried);
+                    return null;
                 });
             }
         }
 
         EXECUTOR_SERVICE.invokeAll(tasks);
+
+        LOGGER.info("Chunks count: {}", tilesCount);
+        LOGGER.info("Requests sends: {}", atomicInteger.get());
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ImageIO.write(image, "png", os);

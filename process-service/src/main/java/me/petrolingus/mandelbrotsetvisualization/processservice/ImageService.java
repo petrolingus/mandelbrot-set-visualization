@@ -1,11 +1,11 @@
 package me.petrolingus.mandelbrotsetvisualization.processservice;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
 public class ImageService {
@@ -16,8 +16,6 @@ public class ImageService {
 
     private final float saturation;
 
-    private final AtomicInteger inProgress = new AtomicInteger();
-
     public ImageService(Mandelbrot mandelbrot) {
         this.mandelbrot = mandelbrot;
         this.hue = ThreadLocalRandom.current().nextFloat();
@@ -25,28 +23,35 @@ public class ImageService {
     }
 
     @GetMapping("/api/v1/generate-mandelbrot-tile")
-    public int[] generateMandelbrotTile(@RequestParam int size,
+    public ResponseEntity<int[]> generateMandelbrotTile(@RequestParam int size,
                                         @RequestParam double xc,
                                         @RequestParam double yc,
                                         @RequestParam double scale,
                                         @RequestParam int maxIterations
     ) {
-        inProgress.incrementAndGet();
-        int[] mandelbrotImage = mandelbrot.getMandelbrotImage(size, xc, yc, scale, maxIterations, hue, saturation);
-        inProgress.decrementAndGet();
-        return mandelbrotImage;
-    }
 
-//    @GetMapping("/probes/live")
-//    private @ResponseBody String live() {
-//        return "ALIVE";
-//    }
-//
-//    @GetMapping("/probes/ready")
-//    private @ResponseBody String ready() {
-////        if (inProgress.get() > 10) {
-////            return ResponseEntity.status(500).build();
-////        }
-//        return "READY";
-//    }
+//        if (Math.random() < 0.1) {
+//            return ResponseEntity.internalServerError().build();
+//        } else if (Math.random() < -1) {
+//            try {
+//                Thread.sleep(Duration.ofMinutes(5));
+//            } catch (InterruptedException e) {
+//                log.error("Cant emulate long response with thread.sleep", e);
+//            }
+//            return ResponseEntity.unprocessableEntity().build();
+//        } else if (Math.random() < -1) {
+//            System.exit(-1);
+//            return ResponseEntity.status(418).build();
+//        } else {
+//            // do logic
+//            return ResponseEntity.ok(new int[]{0, 0, 0, 0}); // ...
+//        }
+
+        if (Math.random() < 0.3) {
+            System.exit(-1);
+        }
+
+        int[] mandelbrotImage = mandelbrot.getMandelbrotImage(size, xc, yc, scale, maxIterations, hue, saturation);
+        return ResponseEntity.ok(mandelbrotImage);
+    }
 }
