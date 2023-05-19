@@ -1,5 +1,4 @@
 .idea
-.mvn
 process-service/target
 ui-service/target
 *.iml
