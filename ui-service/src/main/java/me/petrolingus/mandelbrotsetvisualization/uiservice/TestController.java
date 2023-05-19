@@ -1,0 +1,59 @@
+package me.petrolingus.mandelbrotsetvisualization.uiservice;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+public class TestController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestController.class);
+
+    private static final int MAX_NUMBER_OF_MEASURES = 32;
+
+    final RestTemplate restTemplate;
+
+    final UiController uiController;
+
+    public TestController(RestTemplate restTemplate, UiController uiController) {
+        this.restTemplate = restTemplate;
+        this.uiController = uiController;
+    }
+
+    @PostMapping("/api/v1/launch-test")
+    public void launchTest() throws IOException, InterruptedException {
+
+        UUID uuid = UUID.randomUUID();
+
+        int size = 1024;
+        double xc = -1.0;
+        double yc = 0.0;
+        double scale = 2.0;
+        int iterations = 512;
+
+        // Subdivision can not more than log(size) / log(2)
+        for (int subdivision = 0; subdivision < 6; subdivision++) {
+
+            List<Long> measures = new ArrayList<>();
+            for (int i = 0; i < MAX_NUMBER_OF_MEASURES; i++) {
+                long start = System.currentTimeMillis();
+                uiController.getMandelbrotImage(size, xc, yc, scale, iterations, subdivision);
+                long stop = System.currentTimeMillis();
+                measures.add((stop - start));
+            }
+
+            double avg = measures.stream().mapToDouble(Long::doubleValue).average().orElse(-1);
+            double mean = measures.stream().sorted().toList().get(16);
+
+            LOGGER.info("Test {}# subdivisions: {}, avg: {}ms, mean: {}ms", uuid, subdivision, avg, mean);
+        }
+    }
+
+}
