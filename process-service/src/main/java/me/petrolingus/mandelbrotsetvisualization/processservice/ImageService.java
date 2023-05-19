@@ -1,11 +1,13 @@
 package me.petrolingus.mandelbrotsetvisualization.processservice;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
 public class ImageService {
@@ -15,6 +17,14 @@ public class ImageService {
     private final float hue;
 
     private final float saturation;
+
+    @Value("${systemExitProbability}")
+    private double systemExitProbability;
+
+    @Value("${maxExecutableTasks}")
+    private double maxExecutableTasks;
+
+    private final AtomicInteger inProgressCounter = new AtomicInteger();
 
     public ImageService(Mandelbrot mandelbrot) {
         this.mandelbrot = mandelbrot;
@@ -29,6 +39,12 @@ public class ImageService {
                                         @RequestParam double scale,
                                         @RequestParam int maxIterations
     ) {
+
+        if (inProgressCounter.getAndIncrement() < maxExecutableTasks) {
+            return ResponseEntity.status(429).build();
+        }
+
+        double probability = ThreadLocalRandom.current().nextDouble();
 
 //        if (Math.random() < 0.1) {
 //            return ResponseEntity.internalServerError().build();
@@ -47,11 +63,13 @@ public class ImageService {
 //            return ResponseEntity.ok(new int[]{0, 0, 0, 0}); // ...
 //        }
 
-        if (Math.random() < 0.3) {
+        if (probability < systemExitProbability) {
             System.exit(-1);
         }
 
         int[] mandelbrotImage = mandelbrot.getMandelbrotImage(size, xc, yc, scale, maxIterations, hue, saturation);
+
+        inProgressCounter.decrementAndGet();
         return ResponseEntity.ok(mandelbrotImage);
     }
 }
