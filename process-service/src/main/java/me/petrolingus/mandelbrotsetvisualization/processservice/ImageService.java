@@ -40,7 +40,7 @@ public class ImageService {
                                         @RequestParam int maxIterations
     ) {
 
-        if (inProgressCounter.getAndIncrement() < maxExecutableTasks) {
+        if (inProgressCounter.getAndIncrement() >= maxExecutableTasks) {
             return ResponseEntity.status(429).build();
         }
 
