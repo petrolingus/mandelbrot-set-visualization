@@ -132,7 +132,7 @@ public class UiController {
                             atomicInteger.incrementAndGet();
                             int[] pixels = restTemplate.getForObject(url, int[].class);
                             long stop = System.currentTimeMillis();
-                            LOGGER.info("Chunk {} with size {} generated within {}ms", index, tileScale, (stop - start));
+                            LOGGER.trace("Chunk {} with size {} generated within {}ms", index, tileScale, (stop - start));
 
                             image.setRGB(x, y, tileSize, tileSize, pixels, 0, tileSize);
 
