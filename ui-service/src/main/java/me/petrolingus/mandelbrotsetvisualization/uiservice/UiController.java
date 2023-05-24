@@ -83,12 +83,28 @@ public class UiController {
                                                    @RequestParam int subdivision
     ) throws IOException, InterruptedException {
 
+        if (size > 4096) {
+            throw new IllegalArgumentException("Size must be less or equal than 4096");
+        }
+
+        if (size < 128) {
+            throw new IllegalArgumentException("Size must be more or equal than 128");
+        }
+
+        if ((size & (size - 1)) != 0) {
+            throw new IllegalArgumentException("The size of the image must be a degree of two");
+        }
+
         LOGGER.info("Task with UUID-{}", UUID.randomUUID());
 
         final int tilesInRow = (int) Math.pow(2, subdivision);
         final int tilesCount = tilesInRow * tilesInRow;
         final int tileSize = size / tilesInRow;
         final double tileScale = scale / tilesInRow;
+
+        if (tileSize <= 1) {
+            throw new IllegalArgumentException("Tile size must be more 1 pixel");
+        }
 
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 
