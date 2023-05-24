@@ -143,13 +143,13 @@ public class UiController {
 //                            graphics2D.setColor(color);
 //                            graphics2D.setFont(new Font("Arial Black", Font.BOLD, tileSize / 4));
 //                            graphics2D.drawString(Integer.toString(index), x + tileSize / 2, y + tileSize / 2);
-
                             break;
                         } catch (Throwable e) {
                             long stop = System.currentTimeMillis();
-                            LOGGER.info("Chunk {} NOT GENERATED! Response time {}ms", index, (stop - start));
-                            LOGGER.info(e.toString());
+                            LOGGER.trace("Chunk {} NOT GENERATED! Response time {}ms", index, (stop - start));
+                            LOGGER.trace(e.toString());
                             retried++;
+                            Thread.onSpinWait();
                         }
                     }
                     retriedInteger.addAndGet(retried);
@@ -160,8 +160,8 @@ public class UiController {
 
         EXECUTOR_SERVICE.invokeAll(tasks);
 
-        LOGGER.info("Chunks count: {}", tilesCount);
-        LOGGER.info("Requests sends: {}", atomicInteger.get());
+        LOGGER.debug("Chunks count: {}", tilesCount);
+        LOGGER.debug("Requests sends: {}", atomicInteger.get());
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ImageIO.write(image, "png", os);
