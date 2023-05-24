@@ -32,6 +32,11 @@ public class ImageService {
         this.saturation = 0.2f * ThreadLocalRandom.current().nextFloat() + 0.2f;
     }
 
+    @GetMapping("/api/v1/kill")
+    public void kill() {
+        System.exit(-1);
+    }
+
     @GetMapping("/api/v1/generate-mandelbrot-tile")
     public ResponseEntity<int[]> generateMandelbrotTile(@RequestParam int size,
                                         @RequestParam double xc,
