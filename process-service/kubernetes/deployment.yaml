@@ -5,7 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/name: process-service
 spec:
-  replicas: 2
+  replicas: 16
   selector:
     matchLabels:
       app.kubernetes.io/name: process-service
@@ -20,7 +20,7 @@ spec:
           imagePullPolicy: Always
           env:
             - name: SYSTEM_EXIT_PROBABILITY
-              value: '0.1'
+              value: '-1'
           ports:
             - containerPort: 8080
               protocol: TCP
