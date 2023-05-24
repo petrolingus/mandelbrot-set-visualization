@@ -108,7 +108,7 @@ public class UiController {
 
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 
-        AtomicInteger atomicInteger = new AtomicInteger();
+        AtomicInteger sentRequests = new AtomicInteger();
         AtomicInteger retriedInteger = new AtomicInteger();
 
         List<Callable<Void>> tasks = new ArrayList<>();
@@ -129,7 +129,7 @@ public class UiController {
                     while (true) {
                         long start = System.currentTimeMillis();
                         try {
-                            atomicInteger.incrementAndGet();
+                            sentRequests.incrementAndGet();
                             int[] pixels = restTemplate.getForObject(url, int[].class);
                             long stop = System.currentTimeMillis();
                             LOGGER.trace("Chunk {} with size {} generated within {}ms", index, tileScale, (stop - start));
@@ -152,7 +152,7 @@ public class UiController {
                             Thread.onSpinWait();
                         }
                     }
-                    retriedInteger.addAndGet(retried);
+                    retriedInteger.set(retried);
                     return null;
                 });
             }
@@ -161,7 +161,7 @@ public class UiController {
         EXECUTOR_SERVICE.invokeAll(tasks);
 
         LOGGER.debug("Chunks count: {}", tilesCount);
-        LOGGER.debug("Requests sends: {}", atomicInteger.get());
+        LOGGER.debug("Requests sends: {}", sentRequests.get());
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ImageIO.write(image, "png", os);
