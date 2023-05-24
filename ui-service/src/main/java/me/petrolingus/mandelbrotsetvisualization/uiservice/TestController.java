@@ -2,6 +2,7 @@ package me.petrolingus.mandelbrotsetvisualization.uiservice;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
@@ -23,6 +24,9 @@ public class TestController {
 
     final UiController uiController;
 
+    @Value("${processServiceUrl}")
+    private String processServiceUrl;
+
     public TestController(RestTemplate restTemplate, UiController uiController) {
         this.restTemplate = restTemplate;
         this.uiController = uiController;
@@ -43,25 +47,35 @@ public class TestController {
 
         List<Double> meanList = new ArrayList<>();
 
-        // Subdivision can not more than log(size) / log(2)
-        for (int subdivision = 0; subdivision < 7; subdivision++) {
+        int initialWorkerCount = 16;
 
-            List<Long> measures = new ArrayList<>();
-            for (int i = 0; i < MAX_NUMBER_OF_MEASURES; i++) {
-                long start = System.currentTimeMillis();
-                uiController.getMandelbrotImage(size, xc, yc, scale, iterations, subdivision);
-                long stop = System.currentTimeMillis();
-                measures.add((stop - start));
+        for (int workers = initialWorkerCount / 2; workers > 0; workers /= 2) {
+
+            // Subdivision can not more than log(size) / log(2)
+            for (int subdivision = 0; subdivision < 7; subdivision++) {
+
+                List<Long> measures = new ArrayList<>();
+                for (int i = 0; i < MAX_NUMBER_OF_MEASURES; i++) {
+                    long start = System.currentTimeMillis();
+                    uiController.getMandelbrotImage(size, xc, yc, scale, iterations, subdivision);
+                    long stop = System.currentTimeMillis();
+                    measures.add((stop - start));
+                }
+
+                double avg = measures.stream().mapToDouble(Long::doubleValue).average().orElse(-1);
+                double mean = measures.stream().sorted().toList().get(17);
+                meanList.add(mean);
+
+//            LOGGER.info("Test {}# subdivisions: {}, avg: {}ms, mean: {}ms", uuid, subdivision, avg, mean);
             }
+            LOGGER.info("Result of {} test: {}", uuid, Arrays.toString(meanList.toArray()));
 
-            double avg = measures.stream().mapToDouble(Long::doubleValue).average().orElse(-1);
-            double mean = measures.stream().sorted().toList().get(17);
-            meanList.add(mean);
-
-            LOGGER.info("Test {}# subdivisions: {}, avg: {}ms, mean: {}ms", uuid, subdivision, avg, mean);
+            // Kill half workers
+            for (int i = 0; i < workers; i++) {
+                restTemplate.getForObject(processServiceUrl + "/kill", Void.class);
+            }
+            Thread.sleep(5000);
         }
-
-        LOGGER.info("Result of {} test: {}", uuid, Arrays.toString(meanList.toArray()));
     }
 
 }
