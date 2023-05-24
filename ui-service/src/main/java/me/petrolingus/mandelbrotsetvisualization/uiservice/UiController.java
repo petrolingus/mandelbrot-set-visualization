@@ -95,7 +95,7 @@ public class UiController {
             throw new IllegalArgumentException("The size of the image must be a degree of two");
         }
 
-        LOGGER.info("Task with UUID-{}", UUID.randomUUID());
+        LOGGER.debug("Task with UUID-{}", UUID.randomUUID());
 
         final int tilesInRow = (int) Math.pow(2, subdivision);
         final int tilesCount = tilesInRow * tilesInRow;
