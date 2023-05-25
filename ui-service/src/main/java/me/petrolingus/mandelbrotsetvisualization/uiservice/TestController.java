@@ -47,6 +47,11 @@ public class TestController {
 
         List<Double> meanList = new ArrayList<>();
 
+        // Warmup
+        for (int i = 0; i < 10; i++) {
+            uiController.getMandelbrotImage(size, xc, yc, scale, iterations, 5);
+        }
+
         // Subdivision can not more than log(size) / log(2)
         for (int subdivision = 0; subdivision < 7; subdivision++) {
 
