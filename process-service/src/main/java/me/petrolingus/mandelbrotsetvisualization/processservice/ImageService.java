@@ -27,7 +27,7 @@ public class ImageService {
     @Value("#{environment['BREAKDOWN_PROBABILITY']?:-1}")
     private double breakdownProbability;
 
-    @Value("#{environment['BREAKDOWN_PROBABILITY']?:true}")
+    @Value("#{environment['IS_COLORED']?:true}")
     private boolean isColored;
 
     public ImageService(Mandelbrot mandelbrot) {
