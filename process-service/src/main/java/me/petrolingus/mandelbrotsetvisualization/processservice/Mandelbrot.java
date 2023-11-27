@@ -4,6 +4,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 public class Mandelbrot {

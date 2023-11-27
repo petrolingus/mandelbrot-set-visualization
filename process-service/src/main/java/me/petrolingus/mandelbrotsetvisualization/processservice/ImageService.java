@@ -20,12 +20,15 @@ public class ImageService {
 
     private final Mandelbrot mandelbrot;
 
-    private final float hue;
+    private float hue;
 
-    private final float saturation;
+    private float saturation;
 
-    @Value("#{environment['BREAKDOWN_PROBABILITY']?:0}")
+    @Value("#{environment['BREAKDOWN_PROBABILITY']?:-1}")
     private double breakdownProbability;
+
+    @Value("#{environment['BREAKDOWN_PROBABILITY']?:true}")
+    private boolean isColored;
 
     public ImageService(Mandelbrot mandelbrot) {
         this.mandelbrot = mandelbrot;
@@ -44,6 +47,11 @@ public class ImageService {
             System.exit(-1);
         }
 
+        if (isColored) {
+            this.hue = ThreadLocalRandom.current().nextFloat();
+            this.saturation = 0.2f * ThreadLocalRandom.current().nextFloat() + 0.2f;
+        }
+
         // Generate image
         return mandelbrot.getMandelbrotImage(size, xc, yc, scale, iterations, hue, saturation);
     }
@@ -57,6 +65,11 @@ public class ImageService {
 
         if (ThreadLocalRandom.current().nextDouble() < breakdownProbability) {
             System.exit(-1);
+        }
+
+        if (isColored) {
+            this.hue = ThreadLocalRandom.current().nextFloat();
+            this.saturation = 0.2f * ThreadLocalRandom.current().nextFloat() + 0.2f;
         }
 
         // Generate image
