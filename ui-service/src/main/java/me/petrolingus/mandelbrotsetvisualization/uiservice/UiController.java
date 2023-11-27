@@ -33,12 +33,12 @@ public class UiController {
     }
 
     @GetMapping(value = "/api/v1/get-mandelbrot-image", produces = MediaType.IMAGE_PNG_VALUE)
-    public @ResponseBody byte[] getMandelbrotImageFoo(@RequestParam(defaultValue = "512") int size,
-                                                      @RequestParam(defaultValue = "-1") double xc,
-                                                      @RequestParam(defaultValue = "0") double yc,
-                                                      @RequestParam(defaultValue = "2") double scale,
-                                                      @RequestParam(defaultValue = "128") int maxIterations,
-                                                      @RequestParam(defaultValue = "4") int subdivision
+    public @ResponseBody byte[] getMandelbrotImage(@RequestParam(defaultValue = "512") int size,
+                                                   @RequestParam(defaultValue = "-1") double xc,
+                                                   @RequestParam(defaultValue = "0") double yc,
+                                                   @RequestParam(defaultValue = "2") double scale,
+                                                   @RequestParam(defaultValue = "128") int maxIterations,
+                                                   @RequestParam(defaultValue = "4") int subdivision
     ) throws IOException, InterruptedException {
 
         if (subdivision > 6) {
