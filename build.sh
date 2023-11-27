@@ -1,4 +1,6 @@
-./mvnw clean install
+#!/bin/bash
+
+mvn clean install
 
 docker build --tag petrolingus/process-service:latest ./process-service
 docker build --tag petrolingus/ui-service:latest ./ui-service

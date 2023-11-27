@@ -21,12 +21,12 @@ public class Mandelbrot {
         return FastMath.log(iteration) / FastMath.log(maxIterations);
     }
 
-    public int[] getMandelbrotImage(int size, double xCenter, double yCenter, double scale, int maxIterations, float hue, float saturation) {
+    public int[] getMandelbrotImage(int size, double xc, double yc, double scale, int iterations, float hue, float saturation) {
 
         double halfScale = scale / 2;
         double factor = scale / size;
-        double xStart = xCenter - halfScale;
-        double yStart = yCenter - halfScale;
+        double xStart = xc - halfScale;
+        double yStart = yc - halfScale;
 
         int[] pixels = new int[size * size];
 
@@ -35,7 +35,7 @@ public class Mandelbrot {
             for (int j = 0; j < size; j++) {
                 double y0 = yStart + factor * j;
 
-                float brightness = (float) calculatePixel(x0, y0, maxIterations);
+                float brightness = (float) calculatePixel(x0, y0, iterations);
 
                 int id = (size - 1 - j) * size + i;
                 pixels[id] = Color.HSBtoRGB(hue, saturation, brightness);

@@ -1,1 +1,1 @@
-processServiceUrl: ${PROCESS_SERVICE_URL:http://localhost:8081/api/v1/generate-mandelbrot-tile}
+processServiceUrl: ${PROCESS_SERVICE_URL:http://localhost:80/api/v1/generate-mandelbrot-tile}

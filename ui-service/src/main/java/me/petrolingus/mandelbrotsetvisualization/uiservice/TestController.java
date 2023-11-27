@@ -32,6 +32,13 @@ public class TestController {
         this.uiController = uiController;
     }
 
+    @PostMapping("/api/v1/performance-test")
+    public void performanceTest() {
+
+
+
+    }
+
     @PostMapping("/api/v1/launch-test")
     public void launchTest() throws IOException, InterruptedException {
 

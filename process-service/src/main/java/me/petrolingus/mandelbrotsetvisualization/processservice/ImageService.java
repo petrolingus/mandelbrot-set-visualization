@@ -1,16 +1,19 @@
 package me.petrolingus.mandelbrotsetvisualization.processservice;
 
-import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.concurrent.ThreadLocalRandom;
 
 @RestController
 public class ImageService {
@@ -21,18 +24,8 @@ public class ImageService {
 
     private final float saturation;
 
-    @Value("${systemExitProbability}")
-    private double systemExitProbability;
-
-    @Value("${maxExecutableTasks}")
-    private double maxExecutableTasks;
-
-    private final AtomicInteger inProgressCounter = new AtomicInteger();
-
-    private ExecutorService executorService;
-
-    @Autowired
-    private AsyncTaskService asyncTaskService;
+    @Value("#{environment['BREAKDOWN_PROBABILITY']?:0}")
+    private double breakdownProbability;
 
     public ImageService(Mandelbrot mandelbrot) {
         this.mandelbrot = mandelbrot;
@@ -40,24 +33,41 @@ public class ImageService {
         this.saturation = 0.2f * ThreadLocalRandom.current().nextFloat() + 0.2f;
     }
 
-    @GetMapping("/api/v1/kill")
-    public void kill() {
-        System.exit(-1);
-    }
-
-    @PostConstruct
-    public void init() {
-        executorService = Executors.newFixedThreadPool(8);
-    }
-
     @GetMapping("/api/v1/generate-mandelbrot-tile")
-    public CompletableFuture<ResponseEntity<int[]>> generateMandelbrotTile(@RequestParam int size,
-                                        @RequestParam double xc,
-                                        @RequestParam double yc,
-                                        @RequestParam double scale,
-                                        @RequestParam int maxIterations
+    public @ResponseBody int[] generateMandelbrotTile(@RequestParam(defaultValue = "128") int size,
+                                        @RequestParam(defaultValue = "-1") double xc,
+                                        @RequestParam(defaultValue = "0") double yc,
+                                        @RequestParam(defaultValue = "2") double scale,
+                                        @RequestParam(defaultValue = "128") int iterations
     ){
-        return asyncTaskService.handleExampleRequestAsync(size, xc, yc, scale, maxIterations, hue, saturation)
-                .thenApply(result -> new ResponseEntity<>(result, HttpStatus.OK));
+        if (ThreadLocalRandom.current().nextDouble() < breakdownProbability) {
+            System.exit(-1);
+        }
+
+        // Generate image
+        return mandelbrot.getMandelbrotImage(size, xc, yc, scale, iterations, hue, saturation);
+    }
+
+    @GetMapping(value = "/api/v1/generate-mandelbrot-tile-image", produces = MediaType.IMAGE_PNG_VALUE)
+    public @ResponseBody byte[] generateMandelbrotTileImage(@RequestParam(defaultValue = "128") int size,
+                                                       @RequestParam(defaultValue = "-1") double xc,
+                                                       @RequestParam(defaultValue = "0") double yc,
+                                                       @RequestParam(defaultValue = "2") double scale,
+                                                       @RequestParam(defaultValue = "128") int iterations) throws IOException {
+
+        if (ThreadLocalRandom.current().nextDouble() < breakdownProbability) {
+            System.exit(-1);
+        }
+
+        // Generate image
+        int[] data = mandelbrot.getMandelbrotImage(size, xc, yc, scale, iterations, hue, saturation);
+
+        // Return result
+        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+        image.setRGB(0, 0, size, size, data, 0, size);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", os);
+        InputStream in = new ByteArrayInputStream(os.toByteArray());
+        return in.readAllBytes();
     }
 }
