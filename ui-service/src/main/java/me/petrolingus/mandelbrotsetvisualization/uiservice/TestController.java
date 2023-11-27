@@ -26,7 +26,7 @@ public class TestController {
     }
 
     @PostMapping("/api/v1/performance-test")
-    public void performanceTest(@RequestParam(defaultValue = "100") int n) {
+    public String performanceTest(@RequestParam(defaultValue = "100") int n) {
 
         List<Long> measures = new ArrayList<>();
         for (int i = 0; i < n; i++) {
@@ -39,8 +39,9 @@ public class TestController {
         double average = measures.stream().mapToDouble(Long::doubleValue).average().orElse(-1);
         double median = measures.stream().sorted().toList().get(n / 2);
 
-        LOGGER.info("Result of test: avg={} ms, mean={} ms", average, median);
-
+        String result = String.format("Result of test: avg=%f ms, mean=%f ms", average, median);
+        LOGGER.info(result);
+        return result;
     }
 
 }
