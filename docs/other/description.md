@@ -55,6 +55,7 @@ index.html?size=512&xc=-1&yc=0&scale=2&iterations=128&subdivision=1
 ## Ссылки
 1. https://dev.to/bzon/nginx-ingress-load-balancing-and-retry-1008
 2. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/
+3. https://pelle.io/posts/ctuhl-k8s-port-forward/
 
 
 

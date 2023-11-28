@@ -19,7 +19,7 @@ spec:
           image: petrolingus/ui-service:latest
           imagePullPolicy: Always
           env:
-            - name: PROCESS_SERVICE_URL
-              value: http://process-service-old/api/v1/generate-mandelbrot-tile
+            - name: PROCESS_SERVICE
+              value: http://process-service/api/v1/generate-mandelbrot-tile
           ports:
             - containerPort: 8080

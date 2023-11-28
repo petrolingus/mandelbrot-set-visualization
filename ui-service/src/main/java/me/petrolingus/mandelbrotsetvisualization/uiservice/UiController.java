@@ -25,7 +25,7 @@ public class UiController {
 
     private final RestTemplate restTemplate;
 
-    @Value("#{environment['PROCESS_SERVICE']?:'http://localhost:8181/api/v1/generate-mandelbrot-tile'}")
+    @Value("#{environment['PROCESS_SERVICE']?:'http://localhost:80/api/v1/generate-mandelbrot-tile'}")
     private String processServiceUrl;
 
     public UiController(RestTemplate restTemplate) {

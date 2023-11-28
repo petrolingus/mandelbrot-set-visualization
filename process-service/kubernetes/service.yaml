@@ -3,10 +3,10 @@ kind: Service
 metadata:
   name: process-service
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app.kubernetes.io/name: process-service
   ports:
     - protocol: TCP
-      port: 8181
+      port: 80
       targetPort: 8080

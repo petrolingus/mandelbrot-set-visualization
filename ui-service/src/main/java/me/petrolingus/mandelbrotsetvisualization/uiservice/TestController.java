@@ -53,4 +53,32 @@ public class TestController {
         return result;
     }
 
+    @PostMapping("/api/v1/error-test")
+    public String errorTest(@RequestParam(defaultValue = "128") int size,
+                                  @RequestParam(defaultValue = "-1") double xc,
+                                  @RequestParam(defaultValue = "0") double yc,
+                                  @RequestParam(defaultValue = "2") double scale,
+                                  @RequestParam(defaultValue = "64") int iterations,
+                                  @RequestParam(defaultValue = "6") int subdivision,
+                                  @RequestParam(defaultValue = "1") int executors,
+                                  @RequestParam(defaultValue = "10") int n
+    ) throws IOException, InterruptedException {
+
+        List<Long> measures = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            long start = System.currentTimeMillis();
+            byte[] mandelbrotImage = uiController.getMandelbrotImage(size, xc, yc, scale, iterations, subdivision, executors);
+            long stop = System.currentTimeMillis();
+            measures.add((stop - start));
+            LOGGER.info("blackhole: {}", mandelbrotImage.length);
+        }
+
+        double average = measures.stream().mapToDouble(Long::doubleValue).average().orElse(-1);
+        double median = measures.stream().sorted().toList().get(n / 2);
+
+        String result = String.format("Result of test: avg=%f ms, mean=%f ms", average, median);
+        LOGGER.info(result);
+        return result;
+    }
+
 }
