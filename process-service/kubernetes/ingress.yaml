@@ -15,7 +15,7 @@ spec:
         paths:
           - backend:
               service:
-                name: process-service-old
+                name: process-service
                 port:
                   number: 80
             path: /

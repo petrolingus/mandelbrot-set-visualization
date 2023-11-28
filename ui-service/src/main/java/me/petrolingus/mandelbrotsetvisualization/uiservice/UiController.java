@@ -37,8 +37,9 @@ public class UiController {
                                                    @RequestParam(defaultValue = "-1") double xc,
                                                    @RequestParam(defaultValue = "0") double yc,
                                                    @RequestParam(defaultValue = "2") double scale,
-                                                   @RequestParam(defaultValue = "128") int maxIterations,
-                                                   @RequestParam(defaultValue = "4") int subdivision
+                                                   @RequestParam(defaultValue = "128") int iterations,
+                                                   @RequestParam(defaultValue = "4") int subdivision,
+                                                   @RequestParam(defaultValue = "1") int executors
     ) throws IOException, InterruptedException {
 
         if (subdivision > 6) {
@@ -49,8 +50,7 @@ public class UiController {
         final int tileSize = size / tilesInRow;
         final double tileScale = scale / tilesInRow;
 
-
-        ExecutorService WORKER_THREAD_POOL = Executors.newFixedThreadPool(1);
+        ExecutorService WORKER_THREAD_POOL = Executors.newFixedThreadPool(executors);
 
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 
@@ -64,7 +64,7 @@ public class UiController {
                 double xcTile = (xc + j * tileScale) - (tilesInRow / 2.0 - 0.5) * tileScale;
                 double ycTile = (yc - i * tileScale) + (tilesInRow / 2.0 - 0.5) * tileScale;
 
-                String url = urlGenerator(tileSize, xcTile, ycTile, tileScale, maxIterations);
+                String url = urlGenerator(tileSize, xcTile, ycTile, tileScale, iterations);
 
                 tasks.add(() -> {
                     int[] pixels = restTemplate.getForObject(url, int[].class);

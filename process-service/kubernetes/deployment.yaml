@@ -5,7 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/name: process-service
 spec:
-  replicas: 4
+  replicas: 16
   selector:
     matchLabels:
       app.kubernetes.io/name: process-service
@@ -21,13 +21,15 @@ spec:
           env:
             - name: BREAKDOWN_PROBABILITY
               value: '-1'
+            - name: IS_COLORED
+              value: 'false'
           ports:
             - containerPort: 8080
               protocol: TCP
-          resources:
-            requests:
-              cpu: "250m"
-              memory: "512Mi"
-            limits:
-              cpu: "250m"
-              memory: "512Mi"
+#          resources:
+#            requests:
+#              cpu: "250m"
+#              memory: "512Mi"
+#            limits:
+#              cpu: "250m"
+#              memory: "512Mi"
