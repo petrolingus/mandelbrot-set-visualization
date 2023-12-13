@@ -33,14 +33,16 @@ public class TestController {
                                   @RequestParam(defaultValue = "64") int iterations,
                                   @RequestParam(defaultValue = "6") int subdivision,
                                   @RequestParam(defaultValue = "1") int executors,
-                                  @RequestParam(defaultValue = "10") int n
+                                  @RequestParam(defaultValue = "10") int n,
+                                  @RequestParam(defaultValue = "512") int warmup,
+                                  @RequestParam(defaultValue = "30000") int sleep
     ) throws IOException, InterruptedException {
 
         log.info("Start performance test...");
 
         List<Long> measures = new ArrayList<>();
         for (int i = 0; i < n; i++) {
-            uiController.warmup(512);
+            uiController.warmup(warmup);
             long start = System.currentTimeMillis();
             byte[] mandelbrotImage = uiController.getMandelbrotImage(size, xc, yc, scale, iterations, subdivision, executors);
             long stop = System.currentTimeMillis();
@@ -48,7 +50,7 @@ public class TestController {
             log.info("Experiment #{} took: {}ms", i, took);
             measures.add(took);
             log.debug("blackhole: {}", mandelbrotImage.length);
-            Thread.sleep(30000);
+            Thread.sleep(sleep);
         }
 
         double average = measures.stream().mapToDouble(Long::doubleValue).average().orElse(-1);
