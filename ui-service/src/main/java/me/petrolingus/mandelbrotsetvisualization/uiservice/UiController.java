@@ -1,5 +1,7 @@
 package me.petrolingus.mandelbrotsetvisualization.uiservice;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -19,9 +21,12 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Controller
 public class UiController {
+
+    private static final Logger log = LoggerFactory.getLogger(UiController.class);
 
     private final RestTemplate restTemplate;
 
@@ -54,6 +59,8 @@ public class UiController {
 
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 
+        AtomicInteger sentRequests = new AtomicInteger();
+
         // Create requests pool
         List<Callable<Void>> tasks = new ArrayList<>();
         for (int i = 0; i < tilesInRow; i++) {
@@ -67,8 +74,16 @@ public class UiController {
                 String url = urlGenerator(tileSize, xcTile, ycTile, tileScale, iterations);
 
                 tasks.add(() -> {
-                    int[] pixels = restTemplate.getForObject(url, int[].class);
-                    image.setRGB(x, y, tileSize, tileSize, pixels, 0, tileSize);
+                    while (true) {
+                        try {
+                            sentRequests.incrementAndGet();
+                            int[] pixels = restTemplate.getForObject(url, int[].class);
+                            image.setRGB(x, y, tileSize, tileSize, pixels, 0, tileSize);
+                            break;
+                        } catch (Throwable e) {
+                            Thread.onSpinWait();
+                        }
+                    }
                     return null;
                 });
             }
@@ -76,6 +91,10 @@ public class UiController {
 
         // Execute all requests
         WORKER_THREAD_POOL.invokeAll(tasks);
+
+        // Log results
+        log.info("Chunks count: {}", (tilesInRow * tilesInRow));
+        log.info("Requests sends: {}", sentRequests.get());
 
         // Return image
         ByteArrayOutputStream os = new ByteArrayOutputStream();

@@ -63,7 +63,7 @@ public class ImageService {
                                                        @RequestParam(defaultValue = "2") double scale,
                                                        @RequestParam(defaultValue = "128") int iterations) throws IOException {
 
-        if (ThreadLocalRandom.current().nextDouble() < breakdownProbability) {
+        if (ThreadLocalRandom.current().nextDouble() < (breakdownProbability / 100.0)) {
             System.exit(-1);
         }
 
