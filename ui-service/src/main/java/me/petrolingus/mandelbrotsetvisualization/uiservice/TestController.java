@@ -48,6 +48,7 @@ public class TestController {
             measures.add(took);
             log.debug("blackhole: {}", mandelbrotImage.length);
             Thread.sleep(30000);
+            uiController.warmup(512);
         }
 
         double average = measures.stream().mapToDouble(Long::doubleValue).average().orElse(-1);
