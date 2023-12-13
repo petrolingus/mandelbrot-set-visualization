@@ -81,6 +81,7 @@ public class UiController {
                             image.setRGB(x, y, tileSize, tileSize, pixels, 0, tileSize);
                             break;
                         } catch (Throwable e) {
+                            log.error(e.getMessage());
                             Thread.onSpinWait();
                         }
                     }

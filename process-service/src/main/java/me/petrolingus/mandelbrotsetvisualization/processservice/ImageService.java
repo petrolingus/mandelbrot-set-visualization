@@ -43,7 +43,34 @@ public class ImageService {
                                         @RequestParam(defaultValue = "2") double scale,
                                         @RequestParam(defaultValue = "128") int iterations
     ){
-        if (ThreadLocalRandom.current().nextDouble() < breakdownProbability) {
+        // Generate image
+        return foo(size, xc, yc, scale, iterations);
+    }
+
+    @GetMapping(value = "/api/v1/generate-mandelbrot-tile-image", produces = MediaType.IMAGE_PNG_VALUE)
+    public @ResponseBody byte[] generateMandelbrotTileImage(@RequestParam(defaultValue = "128") int size,
+                                                       @RequestParam(defaultValue = "-1") double xc,
+                                                       @RequestParam(defaultValue = "0") double yc,
+                                                       @RequestParam(defaultValue = "2") double scale,
+                                                       @RequestParam(defaultValue = "128") int iterations) throws IOException {
+
+        int[] data = foo(size, xc, yc, scale, iterations);
+
+        // Return result
+        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+        image.setRGB(0, 0, size, size, data, 0, size);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", os);
+        InputStream in = new ByteArrayInputStream(os.toByteArray());
+        return in.readAllBytes();
+    }
+
+    private int[] foo(int size, double xc, double yc, double scale, int iterations) {
+
+        double rand = Math.random();
+        double prob = breakdownProbability / 100.0;
+        if (rand < prob) {
+            System.out.printf("Error coz %f < %f", rand, prob);
             System.exit(-1);
         }
 
@@ -54,33 +81,5 @@ public class ImageService {
 
         // Generate image
         return mandelbrot.getMandelbrotImage(size, xc, yc, scale, iterations, hue, saturation);
-    }
-
-    @GetMapping(value = "/api/v1/generate-mandelbrot-tile-image", produces = MediaType.IMAGE_PNG_VALUE)
-    public @ResponseBody byte[] generateMandelbrotTileImage(@RequestParam(defaultValue = "128") int size,
-                                                       @RequestParam(defaultValue = "-1") double xc,
-                                                       @RequestParam(defaultValue = "0") double yc,
-                                                       @RequestParam(defaultValue = "2") double scale,
-                                                       @RequestParam(defaultValue = "128") int iterations) throws IOException {
-
-        if (ThreadLocalRandom.current().nextDouble() < (breakdownProbability / 100.0)) {
-            System.exit(-1);
-        }
-
-        if (isColored) {
-            this.hue = ThreadLocalRandom.current().nextFloat();
-            this.saturation = 0.2f * ThreadLocalRandom.current().nextFloat() + 0.2f;
-        }
-
-        // Generate image
-        int[] data = mandelbrot.getMandelbrotImage(size, xc, yc, scale, iterations, hue, saturation);
-
-        // Return result
-        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
-        image.setRGB(0, 0, size, size, data, 0, size);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        ImageIO.write(image, "png", os);
-        InputStream in = new ByteArrayInputStream(os.toByteArray());
-        return in.readAllBytes();
     }
 }
