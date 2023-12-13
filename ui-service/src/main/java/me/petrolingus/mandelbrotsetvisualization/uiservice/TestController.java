@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 public class TestController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestController.class);
+    private static final Logger log = LoggerFactory.getLogger(TestController.class);
 
     final RestTemplate restTemplate;
 
@@ -36,20 +36,25 @@ public class TestController {
                                   @RequestParam(defaultValue = "10") int n
     ) throws IOException, InterruptedException {
 
+        log.info("Start performance test...");
+
         List<Long> measures = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             long start = System.currentTimeMillis();
             byte[] mandelbrotImage = uiController.getMandelbrotImage(size, xc, yc, scale, iterations, subdivision, executors);
             long stop = System.currentTimeMillis();
-            measures.add((stop - start));
-            LOGGER.info("blackhole: {}", mandelbrotImage.length);
+            long took = stop - start;
+            log.info("Experiment #{} took: {}ms", i, took);
+            measures.add(took);
+            log.debug("blackhole: {}", mandelbrotImage.length);
+            Thread.sleep(30000);
         }
 
         double average = measures.stream().mapToDouble(Long::doubleValue).average().orElse(-1);
         double median = measures.stream().sorted().toList().get(n / 2);
 
         String result = String.format("Result of test: avg=%f ms, mean=%f ms", average, median);
-        LOGGER.info(result);
+        log.info(result);
         return result;
     }
 
