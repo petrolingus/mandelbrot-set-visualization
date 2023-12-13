@@ -30,11 +30,20 @@ public class UiController {
 
     private final RestTemplate restTemplate;
 
-    @Value("#{environment['PROCESS_SERVICE']?:'http://localhost:80/api/v1/generate-mandelbrot-tile'}")
+    @Value("#{environment['PROCESS_SERVICE']?:'http://localhost:80'}")
     private String processServiceUrl;
 
     public UiController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+    }
+
+    @GetMapping(value = "/api/v1/warmup")
+    public @ResponseBody void warmup(@RequestParam(defaultValue = "512") int queries) {
+
+        for (int i = 0; i < queries; i++) {
+            restTemplate.getForObject(processServiceUrl + "/api/v1/warmup", Object.class);
+        }
+        System.out.println("Warmup Done!");
     }
 
     @GetMapping(value = "/api/v1/get-mandelbrot-image", produces = MediaType.IMAGE_PNG_VALUE)
@@ -81,7 +90,6 @@ public class UiController {
                             image.setRGB(x, y, tileSize, tileSize, pixels, 0, tileSize);
                             break;
                         } catch (Throwable e) {
-                            log.error(e.getMessage());
                             Thread.onSpinWait();
                         }
                     }
@@ -106,6 +114,7 @@ public class UiController {
 
     private String urlGenerator(int size, double xc, double yc, double scale, int iterations) {
         return processServiceUrl +
+                "/api/v1/generate-mandelbrot-tile" +
                 "?size=" + size +
                 "&xc=" + xc +
                 "&yc=" + yc +

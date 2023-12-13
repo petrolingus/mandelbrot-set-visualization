@@ -36,23 +36,28 @@ public class ImageService {
         this.saturation = 0.2f * ThreadLocalRandom.current().nextFloat() + 0.2f;
     }
 
+    @GetMapping("/api/v1/warmup")
+    public void warmup() {
+        foo(64, -1, 0, 2, 32);
+    }
+
     @GetMapping("/api/v1/generate-mandelbrot-tile")
     public @ResponseBody int[] generateMandelbrotTile(@RequestParam(defaultValue = "128") int size,
-                                        @RequestParam(defaultValue = "-1") double xc,
-                                        @RequestParam(defaultValue = "0") double yc,
-                                        @RequestParam(defaultValue = "2") double scale,
-                                        @RequestParam(defaultValue = "128") int iterations
-    ){
+                                                      @RequestParam(defaultValue = "-1") double xc,
+                                                      @RequestParam(defaultValue = "0") double yc,
+                                                      @RequestParam(defaultValue = "2") double scale,
+                                                      @RequestParam(defaultValue = "128") int iterations
+    ) {
         // Generate image
         return foo(size, xc, yc, scale, iterations);
     }
 
     @GetMapping(value = "/api/v1/generate-mandelbrot-tile-image", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody byte[] generateMandelbrotTileImage(@RequestParam(defaultValue = "128") int size,
-                                                       @RequestParam(defaultValue = "-1") double xc,
-                                                       @RequestParam(defaultValue = "0") double yc,
-                                                       @RequestParam(defaultValue = "2") double scale,
-                                                       @RequestParam(defaultValue = "128") int iterations) throws IOException {
+                                                            @RequestParam(defaultValue = "-1") double xc,
+                                                            @RequestParam(defaultValue = "0") double yc,
+                                                            @RequestParam(defaultValue = "2") double scale,
+                                                            @RequestParam(defaultValue = "128") int iterations) throws IOException {
 
         int[] data = foo(size, xc, yc, scale, iterations);
 
