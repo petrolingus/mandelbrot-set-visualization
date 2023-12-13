@@ -40,6 +40,7 @@ public class TestController {
 
         List<Long> measures = new ArrayList<>();
         for (int i = 0; i < n; i++) {
+            uiController.warmup(512);
             long start = System.currentTimeMillis();
             byte[] mandelbrotImage = uiController.getMandelbrotImage(size, xc, yc, scale, iterations, subdivision, executors);
             long stop = System.currentTimeMillis();
@@ -48,7 +49,6 @@ public class TestController {
             measures.add(took);
             log.debug("blackhole: {}", mandelbrotImage.length);
             Thread.sleep(30000);
-            uiController.warmup(512);
         }
 
         double average = measures.stream().mapToDouble(Long::doubleValue).average().orElse(-1);
