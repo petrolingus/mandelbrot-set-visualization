@@ -20,6 +20,6 @@ spec:
           imagePullPolicy: Always
           env:
             - name: PROCESS_SERVICE
-              value: http://process-service/api/v1/generate-mandelbrot-tile
+              value: http://process-service
           ports:
             - containerPort: 8080

@@ -87,4 +87,14 @@ public class ImageService {
         // Generate image
         return mandelbrot.getMandelbrotImage(size, xc, yc, scale, iterations, hue, saturation);
     }
+
+    @GetMapping("/probes/liveness")
+    private @ResponseBody String live() {
+        return "ALIVE";
+    }
+
+    @GetMapping("/probes/readiness")
+    private @ResponseBody String ready() {
+        return "READY";
+    }
 }
