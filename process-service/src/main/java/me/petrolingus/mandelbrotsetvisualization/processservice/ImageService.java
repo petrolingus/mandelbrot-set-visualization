@@ -38,7 +38,7 @@ public class ImageService {
 
     @GetMapping("/api/v1/warmup")
     public void warmup() {
-        foo(64, -1, 0, 2, 32);
+        foo(64, -1, 0, 2, 32, false);
     }
 
     @GetMapping("/api/v1/generate-mandelbrot-tile")
@@ -49,7 +49,7 @@ public class ImageService {
                                                       @RequestParam(defaultValue = "128") int iterations
     ) {
         // Generate image
-        return foo(size, xc, yc, scale, iterations);
+        return foo(size, xc, yc, scale, iterations, true);
     }
 
     @GetMapping(value = "/api/v1/generate-mandelbrot-tile-image", produces = MediaType.IMAGE_PNG_VALUE)
@@ -59,7 +59,7 @@ public class ImageService {
                                                             @RequestParam(defaultValue = "2") double scale,
                                                             @RequestParam(defaultValue = "128") int iterations) throws IOException {
 
-        int[] data = foo(size, xc, yc, scale, iterations);
+        int[] data = foo(size, xc, yc, scale, iterations, true);
 
         // Return result
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
@@ -70,11 +70,11 @@ public class ImageService {
         return in.readAllBytes();
     }
 
-    private int[] foo(int size, double xc, double yc, double scale, int iterations) {
+    private int[] foo(int size, double xc, double yc, double scale, int iterations, boolean isBreakable) {
 
         double rand = Math.random();
         double prob = breakdownProbability / 100.0;
-        if (rand < prob) {
+        if (isBreakable && rand < prob) {
             System.out.printf("Error coz %f < %f", rand, prob);
             System.exit(-1);
         }
