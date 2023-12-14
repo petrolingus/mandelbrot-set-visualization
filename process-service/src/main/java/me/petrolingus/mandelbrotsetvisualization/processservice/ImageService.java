@@ -29,6 +29,9 @@ public class ImageService {
     @Value("#{environment['BREAKDOWN_PROBABILITY']?:-1}")
     private double breakdownProbability;
 
+    @Value("#{environment['BREAKDOWN_PROBABILITY_HARD']?:-1}")
+    private double breakdownProbabilityHard;
+
     @Value("#{environment['IS_COLORED']?:true}")
     private boolean isColored;
 
@@ -51,10 +54,16 @@ public class ImageService {
                                                         @RequestParam(defaultValue = "128") int iterations
     ) {
         double rand = Math.random();
+
         double prob = breakdownProbability / 100.0;
         if (rand < prob) {
             System.out.printf("Error coz %f < %f", rand, prob);
             return ResponseEntity.status(502).build();
+        }
+
+        double prob2 = breakdownProbabilityHard / 100.0;
+        if (rand < prob2) {
+            System.exit(-1);
         }
 
         // Generate image
