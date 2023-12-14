@@ -5,7 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/name: process-service
 spec:
-  replicas: 8
+  replicas: 16
   selector:
     matchLabels:
       app.kubernetes.io/name: process-service
@@ -21,26 +21,28 @@ spec:
           env:
             - name: BREAKDOWN_PROBABILITY
               value: '-1'
+            - name: BREAKDOWN_PROBABILITY_HARD
+              value: '5'
             - name: IS_COLORED
               value: 'false'
           ports:
             - containerPort: 8080
               protocol: TCP
-#          resources:
-#            requests:
-#              cpu: "250m"
-#              memory: "512Mi"
-#            limits:
-#              cpu: "250m"
-#              memory: "512Mi"
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
           livenessProbe: # Проба работоспособности проверяет, выполняется контейнер или нет.
             httpGet:
               path: /probe/liveness
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 5
+            initialDelaySeconds: 20
             periodSeconds: 1
-            timeoutSeconds: 1
+            timeoutSeconds: 2
             successThreshold: 1
             failureThreshold: 3
           readinessProbe: # Проба готовности проверяет, готово ли приложение обслуживать запросы.
@@ -48,9 +50,9 @@ spec:
               path: /probe/readiness
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 5 # через сколько секунд после запуска контейнера начинаются пробы работоспособности или готовности.
-            periodSeconds: 1 # колько секунд проходит между пробами.
-            timeoutSeconds: 1 #  через сколько секунд истекает время ожидания пробы.
+            initialDelaySeconds: 20 # через сколько секунд после запуска контейнера начинаются пробы работоспособности или готовности.
+            periodSeconds: 1 # сколько секунд проходит между пробами.
+            timeoutSeconds: 2 #  через сколько секунд истекает время ожидания пробы.
             successThreshold: 1 # сколько проб подряд должно завершиться успехом, чтобы проверка считалась успешной после проваленной пробы.
             failureThreshold: 3 # сколько проб должно провалиться, чтобы пришлось перезапускать контейнер. (или pod был помечен как неготовый, если речь о проверке готовности).
       restartPolicy: Always
