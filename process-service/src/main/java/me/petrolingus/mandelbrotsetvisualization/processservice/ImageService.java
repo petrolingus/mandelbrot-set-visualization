@@ -54,7 +54,7 @@ public class ImageService {
         double prob = breakdownProbability / 100.0;
         if (rand < prob) {
             System.out.printf("Error coz %f < %f", rand, prob);
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.status(502).build();
         }
 
         // Generate image
