@@ -1,5 +1,7 @@
 package me.petrolingus.mandelbrotsetvisualization.processservice;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @RestController
 public class ImageService {
+
+    private static final Logger log = LoggerFactory.getLogger(ImageService.class);
 
     private final Mandelbrot mandelbrot;
 
@@ -41,12 +45,15 @@ public class ImageService {
     }
 
     @GetMapping("/api/v1/generate-mandelbrot-tile")
-    public ResponseEntity<int[]> generateMandelbrotTile(@RequestParam(defaultValue = "128") int size,
-                                                        @RequestParam(defaultValue = "-1") double xc,
-                                                        @RequestParam(defaultValue = "0") double yc,
-                                                        @RequestParam(defaultValue = "2") double scale,
-                                                        @RequestParam(defaultValue = "128") int iterations
+    public synchronized ResponseEntity<int[]> generateMandelbrotTile(@RequestParam(defaultValue = "128") int size,
+                                                                     @RequestParam(defaultValue = "-1") double xc,
+                                                                     @RequestParam(defaultValue = "0") double yc,
+                                                                     @RequestParam(defaultValue = "2") double scale,
+                                                                     @RequestParam(defaultValue = "128") int iterations
     ) {
+
+        log.info(Thread.currentThread().getName());
+
         double rand = Math.random();
 
         double prob = breakdownProbability / 100.0;
