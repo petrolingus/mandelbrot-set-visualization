@@ -20,7 +20,7 @@ public class UiServiceApplication {
 	public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
 		return restTemplateBuilder
 				.setConnectTimeout(Duration.of(1, ChronoUnit.SECONDS))
-				.setReadTimeout(Duration.of(1, ChronoUnit.SECONDS))
+				.setReadTimeout(Duration.of(100, ChronoUnit.MILLIS))
 				.build();
 	}
 }

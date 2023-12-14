@@ -94,7 +94,8 @@ public class UiController {
                             image.setRGB(x, y, tileSize, tileSize, pixels, 0, tileSize);
                             break;
                         } catch (Throwable e) {
-                            TimeUnit.MILLISECONDS.sleep(retryDelay);
+//                            TimeUnit.MILLISECONDS.sleep(retryDelay);
+                            Thread.onSpinWait();
                         }
                     }
                     return null;
