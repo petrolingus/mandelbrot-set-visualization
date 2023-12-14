@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.ThreadLocalRandom;
 
 @RestController
@@ -32,8 +33,11 @@ public class ImageService {
     @Value("#{environment['BREAKDOWN_PROBABILITY']?:-1}")
     private double breakdownProbability;
 
-    @Value("#{environment['BREAKDOWN_PROBABILITY_HARD']?:-1}")
-    private double breakdownProbabilityHard;
+    @Value("#{environment['BAD_GATEWAY_PROBABILITY']?:-1}")
+    private double badGatewayProbability;
+
+    @Value("#{environment['TIMEOUT_PROBABILITY']?:-1}")
+    private double timeoutProbability;
 
     @Value("#{environment['IS_COLORED']?:true}")
     private boolean isColored;
@@ -50,20 +54,25 @@ public class ImageService {
                                                                      @RequestParam(defaultValue = "0") double yc,
                                                                      @RequestParam(defaultValue = "2") double scale,
                                                                      @RequestParam(defaultValue = "128") int iterations
-    ) {
+    ) throws InterruptedException {
 
         log.info(Thread.currentThread().getName());
 
         double rand = Math.random();
 
-        double prob = breakdownProbability / 100.0;
-        if (rand < prob) {
+        double breakdown = breakdownProbability / 100.0;
+        if (rand < breakdown) {
+            System.exit(-1);
+        }
+
+        double badGateway = badGatewayProbability / 100.0;
+        if (rand < badGateway) {
             return ResponseEntity.status(502).build();
         }
 
-        double prob2 = breakdownProbabilityHard / 100.0;
-        if (rand < prob2) {
-            System.exit(-1);
+        double timeout = timeoutProbability / 100.0;
+        if (rand < timeout) {
+            Thread.sleep(10_000);
         }
 
         // Generate image
