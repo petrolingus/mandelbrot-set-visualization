@@ -34,7 +34,7 @@ public class UiController {
     @Value("#{environment['PROCESS_SERVICE']?:'http://localhost:80'}")
     private String processServiceUrl;
 
-    @Value("#{environment['RETRY_DELAY']?:'1'}")
+    @Value("#{environment['RETRY_DELAY']?:'100'}")
     private int retryDelay;
 
     public UiController(RestTemplate restTemplate) {

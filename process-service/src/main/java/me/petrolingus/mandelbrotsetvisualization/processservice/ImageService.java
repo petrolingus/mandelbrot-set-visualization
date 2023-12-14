@@ -1,7 +1,6 @@
 package me.petrolingus.mandelbrotsetvisualization.processservice;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,11 +40,6 @@ public class ImageService {
         this.saturation = 0.2f * ThreadLocalRandom.current().nextFloat() + 0.2f;
     }
 
-    @GetMapping("/api/v1/warmup")
-    public void warmup() {
-        foo(64, -1, 0, 2, 32);
-    }
-
     @GetMapping("/api/v1/generate-mandelbrot-tile")
     public ResponseEntity<int[]> generateMandelbrotTile(@RequestParam(defaultValue = "128") int size,
                                                         @RequestParam(defaultValue = "-1") double xc,
@@ -57,7 +51,6 @@ public class ImageService {
 
         double prob = breakdownProbability / 100.0;
         if (rand < prob) {
-            System.out.printf("Error coz %f < %f", rand, prob);
             return ResponseEntity.status(502).build();
         }
 
@@ -88,6 +81,11 @@ public class ImageService {
         ImageIO.write(image, "png", os);
         InputStream in = new ByteArrayInputStream(os.toByteArray());
         return in.readAllBytes();
+    }
+
+    @GetMapping("/api/v1/warmup")
+    public void warmup() {
+        foo(64, -1, 0, 2, 32);
     }
 
     private int[] foo(int size, double xc, double yc, double scale, int iterations) {
