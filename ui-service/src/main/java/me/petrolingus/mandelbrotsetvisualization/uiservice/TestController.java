@@ -42,7 +42,9 @@ public class TestController {
 
         List<Long> measures = new ArrayList<>();
         for (int i = 0; i < n; i++) {
-            uiController.warmup(warmup);
+            if (warmup > 0) {
+                uiController.warmup(warmup);
+            }
             long start = System.currentTimeMillis();
             byte[] mandelbrotImage = uiController.getMandelbrotImage(size, xc, yc, scale, iterations, subdivision, executors);
             long stop = System.currentTimeMillis();
