@@ -9,15 +9,15 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-next-upstream-tries: "0"
     nginx.ingress.kubernetes.io/proxy-next-upstream-timeout: "0"
 spec:
+  ingressClassName: nginx
   rules:
-    - host: localhost
+    - host: ingress-nginx-controller.ingress-nginx
       http:
         paths:
-          - backend:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
               service:
                 name: process-service
                 port:
                   number: 80
-            path: /
-            pathType: ImplementationSpecific
-  ingressClassName: nginx

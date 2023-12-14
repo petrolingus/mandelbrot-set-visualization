@@ -20,38 +20,38 @@ spec:
           imagePullPolicy: Always
           env:
             - name: BREAKDOWN_PROBABILITY
-              value: '5'
+              value: '-1'
             - name: IS_COLORED
               value: 'false'
           ports:
             - containerPort: 8080
               protocol: TCP
-          resources:
-            requests:
-              cpu: "250m"
-              memory: "512Mi"
-            limits:
-              cpu: "250m"
-              memory: "512Mi"
-          livenessProbe:
+#          resources:
+#            requests:
+#              cpu: "250m"
+#              memory: "512Mi"
+#            limits:
+#              cpu: "250m"
+#              memory: "512Mi"
+          livenessProbe: # Проба работоспособности проверяет, выполняется контейнер или нет.
             httpGet:
               path: /probe/liveness
-              port: web
+              port: 8080
               scheme: HTTP
             initialDelaySeconds: 5
             periodSeconds: 1
             timeoutSeconds: 1
             successThreshold: 1
             failureThreshold: 3
-          readinessProbe:
+          readinessProbe: # Проба готовности проверяет, готово ли приложение обслуживать запросы.
             httpGet:
               path: /probe/readiness
-              port: web
+              port: 8080
               scheme: HTTP
-            initialDelaySeconds: 5
-            periodSeconds: 1
-            timeoutSeconds: 1
-            successThreshold: 1
-            failureThreshold: 3
+            initialDelaySeconds: 5 # через сколько секунд после запуска контейнера начинаются пробы работоспособности или готовности.
+            periodSeconds: 1 # колько секунд проходит между пробами.
+            timeoutSeconds: 1 #  через сколько секунд истекает время ожидания пробы.
+            successThreshold: 1 # сколько проб подряд должно завершиться успехом, чтобы проверка считалась успешной после проваленной пробы.
+            failureThreshold: 3 # сколько проб должно провалиться, чтобы пришлось перезапускать контейнер. (или pod был помечен как неготовый, если речь о проверке готовности).
       restartPolicy: Always
-      terminationGracePeriodSeconds: 1
+      terminationGracePeriodSeconds: 10

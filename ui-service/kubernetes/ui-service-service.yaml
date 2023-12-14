@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ui-service
+  name: ui-service-service
   labels:
-    app.kubernetes.io/name: ui-service
+    app.kubernetes.io/name: ui-service-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: ui-service
+      app.kubernetes.io/name: ui-service-service
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: ui-service
+        app.kubernetes.io/name: ui-service-service
     spec:
       containers:
-        - name: ui-service
+        - name: ui-service-service
           image: petrolingus/ui-service:latest
           imagePullPolicy: Always
           env:

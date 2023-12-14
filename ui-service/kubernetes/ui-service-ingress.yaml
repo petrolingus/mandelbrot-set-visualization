@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui-service-ingress
+  labels:
+    app.kubernetes.io/name: ui-service-ingress
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ui-service-ingress
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ui-service-ingress
+    spec:
+      containers:
+        - name: ui-service-ingress
+          image: petrolingus/ui-service:latest
+          imagePullPolicy: Always
+          env:
+            - name: PROCESS_SERVICE
+              value: http://ingress-nginx-controller.ingress-nginx
+          ports:
+            - containerPort: 8080
