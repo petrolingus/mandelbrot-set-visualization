@@ -1,7 +1,9 @@
 package me.petrolingus.mandelbrotsetvisualization.processservice;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -38,18 +40,27 @@ public class ImageService {
 
     @GetMapping("/api/v1/warmup")
     public void warmup() {
-        foo(64, -1, 0, 2, 32, false);
+        foo(64, -1, 0, 2, 32);
     }
 
     @GetMapping("/api/v1/generate-mandelbrot-tile")
-    public @ResponseBody int[] generateMandelbrotTile(@RequestParam(defaultValue = "128") int size,
-                                                      @RequestParam(defaultValue = "-1") double xc,
-                                                      @RequestParam(defaultValue = "0") double yc,
-                                                      @RequestParam(defaultValue = "2") double scale,
-                                                      @RequestParam(defaultValue = "128") int iterations
+    public ResponseEntity<int[]> generateMandelbrotTile(@RequestParam(defaultValue = "128") int size,
+                                                        @RequestParam(defaultValue = "-1") double xc,
+                                                        @RequestParam(defaultValue = "0") double yc,
+                                                        @RequestParam(defaultValue = "2") double scale,
+                                                        @RequestParam(defaultValue = "128") int iterations
     ) {
+        double rand = Math.random();
+        double prob = breakdownProbability / 100.0;
+        if (rand < prob) {
+            System.out.printf("Error coz %f < %f", rand, prob);
+            return ResponseEntity.internalServerError().build();
+        }
+
         // Generate image
-        return foo(size, xc, yc, scale, iterations, true);
+        int[] image = foo(size, xc, yc, scale, iterations);
+
+        return ResponseEntity.ok(image);
     }
 
     @GetMapping(value = "/api/v1/generate-mandelbrot-tile-image", produces = MediaType.IMAGE_PNG_VALUE)
@@ -59,7 +70,7 @@ public class ImageService {
                                                             @RequestParam(defaultValue = "2") double scale,
                                                             @RequestParam(defaultValue = "128") int iterations) throws IOException {
 
-        int[] data = foo(size, xc, yc, scale, iterations, true);
+        int[] data = foo(size, xc, yc, scale, iterations);
 
         // Return result
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
@@ -70,14 +81,7 @@ public class ImageService {
         return in.readAllBytes();
     }
 
-    private int[] foo(int size, double xc, double yc, double scale, int iterations, boolean isBreakable) {
-
-        double rand = Math.random();
-        double prob = breakdownProbability / 100.0;
-        if (isBreakable && rand < prob) {
-            System.out.printf("Error coz %f < %f", rand, prob);
-            System.exit(-1);
-        }
+    private int[] foo(int size, double xc, double yc, double scale, int iterations) {
 
         if (isColored) {
             this.hue = ThreadLocalRandom.current().nextFloat();
