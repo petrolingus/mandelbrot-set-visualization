@@ -45,7 +45,11 @@ public class UiController {
     public @ResponseBody void warmup(@RequestParam(defaultValue = "512") int queries) {
 
         for (int i = 0; i < queries; i++) {
-            restTemplate.getForObject(processServiceUrl + "/api/v1/warmup", Object.class);
+            try {
+                restTemplate.getForObject(processServiceUrl + "/api/v1/warmup", Object.class);
+            } catch (Throwable e) {
+                log.debug(e.getMessage());
+            }
         }
         System.out.println("Warmup Done!");
     }
