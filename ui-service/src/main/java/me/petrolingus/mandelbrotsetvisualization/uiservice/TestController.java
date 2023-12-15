@@ -56,7 +56,7 @@ public class TestController {
     private void lab(int size, double xc, double yc, double scale, int iterations, int subdivision, int executors, int imageCount, int pauseBetweenImages, int pauseBetweenExperiments) throws IOException, InterruptedException {
 
         log.info("Start experiment [pod restart]...");
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 11; i++) {
             uiController.breakdownProbabilityParam = i;
             experiment(size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, i);
             Thread.sleep(pauseBetweenExperiments);
@@ -64,7 +64,7 @@ public class TestController {
         uiController.breakdownProbabilityParam = -1;
 
         log.info("Start experiment [timeout]...");
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 11; i++) {
             uiController.timeoutProbabilityParam = i;
             experiment(size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, i);
             Thread.sleep(pauseBetweenExperiments);
@@ -72,7 +72,7 @@ public class TestController {
         uiController.timeoutProbabilityParam = -1;
 
         log.info("Start experiment [bad gateway]...");
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 11; i++) {
             uiController.badGatewayParam = i;
             experiment(size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, i);
             Thread.sleep(pauseBetweenExperiments);
