@@ -55,13 +55,13 @@ public class ImageService {
                                                                      @RequestParam(defaultValue = "128") int iterations
     ) throws InterruptedException {
 
-        log.info("Running /api/v1/generate-mandelbrot-tile?size={}&xc={}&yc={}&scale={}&iterations={}", size, xc, yc, scale, iterations);
+//        log.info("Running /api/v1/generate-mandelbrot-tile?size={}&xc={}&yc={}&scale={}&iterations={}", size, xc, yc, scale, iterations);
 
         double rand = Math.random();
 
         double breakdown = breakdownProbability / 100.0;
         if (rand < breakdown) {
-            log.info("breakdown...");
+//            log.info("breakdown...");
             System.exit(-1);
         }
 

@@ -78,8 +78,6 @@ public class UiController {
 
         AtomicInteger sentRequests = new AtomicInteger();
         AtomicInteger errorCount = new AtomicInteger();
-        AtomicInteger finallyCount = new AtomicInteger();
-        AtomicInteger sentCount = new AtomicInteger();
 
         // Create requests pool
         List<Callable<Void>> tasks = new ArrayList<>();
@@ -95,7 +93,6 @@ public class UiController {
 
                 tasks.add(() -> {
                     while (true) {
-                        sentCount.incrementAndGet();
                         try {
                             sentRequests.incrementAndGet();
                             int[] pixels = restTemplate.getForObject(url, int[].class);
@@ -103,10 +100,8 @@ public class UiController {
                             break;
                         } catch (Throwable e) {
                             errorCount.incrementAndGet();
-//                            log.info(e.getMessage());
+                            log.debug(e.getMessage());
                             TimeUnit.MILLISECONDS.sleep(retryDelay);
-                        } finally {
-                            finallyCount.incrementAndGet();
                         }
                     }
                     return null;
@@ -121,8 +116,6 @@ public class UiController {
         log.info("Chunks count: {}", (tilesInRow * tilesInRow));
         log.info("Requests sends: {}", sentRequests.get());
         log.info("Error count: {}", errorCount.get());
-        log.info("Error count: {}", finallyCount.get());
-        log.info("Error count: {}", sentCount.get());
 
         // Return image
         ByteArrayOutputStream os = new ByteArrayOutputStream();
