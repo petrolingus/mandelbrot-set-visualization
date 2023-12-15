@@ -115,7 +115,7 @@ public class UiController {
         // Log results
         log.info("Chunks count: {}", (tilesInRow * tilesInRow));
         log.info("Requests sends: {}", sentRequests.get());
-        log.info("Error count: {}", sentRequests.get());
+        log.info("Error count: {}", errorCount.get());
 
         // Return image
         ByteArrayOutputStream os = new ByteArrayOutputStream();
