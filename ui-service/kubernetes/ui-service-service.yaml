@@ -23,5 +23,7 @@ spec:
               value: http://process-service
             - name: RETRY_DELAY
               value: '10'
+            - name: READ_TIMEOUT
+              value: '1000'
           ports:
             - containerPort: 8080
