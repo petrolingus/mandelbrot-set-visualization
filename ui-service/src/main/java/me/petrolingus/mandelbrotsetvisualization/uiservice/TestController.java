@@ -43,21 +43,21 @@ public class TestController {
 
         for (int i = 0; i < 10; i++) {
             uiController.breakdownProbabilityParam = i;
-            experiment("pod restart", size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages);
+            experiment("pod restart", size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, i);
             Thread.sleep(pauseBetweenExperiments);
         }
         uiController.breakdownProbabilityParam = -1;
 
         for (int i = 0; i < 10; i++) {
             uiController.timeoutProbabilityParam = i;
-            experiment("timeout", size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages);
+            experiment("timeout", size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, i);
             Thread.sleep(pauseBetweenExperiments);
         }
         uiController.timeoutProbabilityParam = -1;
 
         for (int i = 0; i < 10; i++) {
             uiController.badGatewayParam = i;
-            experiment("bad gateway", size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages);
+            experiment("bad gateway", size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, i);
             Thread.sleep(pauseBetweenExperiments);
         }
         uiController.badGatewayParam = -1;
@@ -66,7 +66,7 @@ public class TestController {
         return "Done performance test!";
     }
 
-    private void experiment(String name, int size, double xc, double yc, double scale, int iterations, int subdivision, int executors, int imageCount, int pauseBetweenImages) throws IOException, InterruptedException {
+    private void experiment(String name, int size, double xc, double yc, double scale, int iterations, int subdivision, int executors, int imageCount, int pauseBetweenImages, int err) throws IOException, InterruptedException {
 
         log.info("Start experiment [{}}]...", name);
 
@@ -85,7 +85,7 @@ public class TestController {
         double median = measures.stream().sorted().toList().get(imageCount / 2);
         double p95 = measures.stream().sorted().toList().get((int) Math.round(imageCount * 0.95) - 1);
 
-        log.info("Result of test: avg={} ms, mean={} ms, p95={}", average, median, p95);
+        log.info("Result of test: err={}, avg={} ms, mean={} ms, p95={}", err, average, median, p95);
     }
 
 }
