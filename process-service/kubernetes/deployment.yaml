@@ -21,8 +21,10 @@ spec:
           env:
             - name: BREAKDOWN_PROBABILITY
               value: '-1'
-            - name: BREAKDOWN_PROBABILITY_HARD
-              value: '5'
+            - name: BAD_GATEWAY_PROBABILITY
+              value: '-1'
+            - name: TIMEOUT_PROBABILITY
+              value: '10'
             - name: IS_COLORED
               value: 'false'
           ports:
@@ -56,4 +58,4 @@ spec:
             successThreshold: 1 # сколько проб подряд должно завершиться успехом, чтобы проверка считалась успешной после проваленной пробы.
             failureThreshold: 3 # сколько проб должно провалиться, чтобы пришлось перезапускать контейнер. (или pod был помечен как неготовый, если речь о проверке готовности).
       restartPolicy: Always
-      terminationGracePeriodSeconds: 10
+      terminationGracePeriodSeconds: 1
