@@ -61,6 +61,7 @@ public class ImageService {
 
         double breakdown = breakdownProbability / 100.0;
         if (rand < breakdown) {
+            log.info("breakdown...");
             System.exit(-1);
         }
 
