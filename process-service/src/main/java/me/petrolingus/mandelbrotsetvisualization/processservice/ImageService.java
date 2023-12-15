@@ -55,6 +55,8 @@ public class ImageService {
                                                                      @RequestParam(defaultValue = "128") int iterations
     ) throws InterruptedException {
 
+        log.info("Running /api/v1/generate-mandelbrot-tile?size={}&xc={}&yc={}&scale={}&iterations={}", size, xc, yc, scale, iterations);
+
         double rand = Math.random();
 
         double breakdown = breakdownProbability / 100.0;
@@ -84,6 +86,8 @@ public class ImageService {
                                                             @RequestParam(defaultValue = "0") double yc,
                                                             @RequestParam(defaultValue = "2") double scale,
                                                             @RequestParam(defaultValue = "128") int iterations) throws IOException {
+
+        log.info("Running /api/v1/generate-mandelbrot-tile-image");
 
         int[] data = foo(size, xc, yc, scale, iterations);
 
