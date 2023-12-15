@@ -55,8 +55,6 @@ public class ImageService {
                                                                      @RequestParam(defaultValue = "128") int iterations
     ) throws InterruptedException {
 
-        log.info(Thread.currentThread().getName());
-
         double rand = Math.random();
 
         double breakdown = breakdownProbability / 100.0;

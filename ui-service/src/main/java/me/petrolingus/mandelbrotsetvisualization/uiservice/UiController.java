@@ -77,6 +77,7 @@ public class UiController {
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 
         AtomicInteger sentRequests = new AtomicInteger();
+        AtomicInteger errorCount = new AtomicInteger();
 
         // Create requests pool
         List<Callable<Void>> tasks = new ArrayList<>();
@@ -98,6 +99,8 @@ public class UiController {
                             image.setRGB(x, y, tileSize, tileSize, pixels, 0, tileSize);
                             break;
                         } catch (Throwable e) {
+                            errorCount.incrementAndGet();
+//                            log.info(e.getMessage());
                             TimeUnit.MILLISECONDS.sleep(retryDelay);
                         }
                     }
@@ -112,6 +115,7 @@ public class UiController {
         // Log results
         log.info("Chunks count: {}", (tilesInRow * tilesInRow));
         log.info("Requests sends: {}", sentRequests.get());
+        log.info("Error count: {}", sentRequests.get());
 
         // Return image
         ByteArrayOutputStream os = new ByteArrayOutputStream();
