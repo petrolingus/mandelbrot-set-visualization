@@ -122,9 +122,9 @@ public class UiController {
         WORKER_THREAD_POOL.invokeAll(tasks);
 
         // Log results
-        log.info("Chunks count: {}", (tilesInRow * tilesInRow));
-        log.info("Requests sends: {}", sentRequests.get());
-        log.info("Error count: {}", errorCount.get());
+//        log.info("Chunks count: {}", (tilesInRow * tilesInRow));
+//        log.info("Requests sends: {}", sentRequests.get());
+//        log.info("Error count: {}", errorCount.get());
 
         // Return image
         ByteArrayOutputStream os = new ByteArrayOutputStream();
