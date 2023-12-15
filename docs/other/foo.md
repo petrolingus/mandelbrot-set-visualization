@@ -140,6 +140,16 @@ spec:
 
 ## Исследование
 
+## Ответы на вопросы
 
+```txt
+10.1.5.3 - - [15/Dec/2023:01:47:13 +0000] "GET /api/v1/generate-mandelbrot-tile?size=512&xc=-1.5&yc=0.5&scale=1.0&iterations=256 HTTP/1.1" 200 2603224 "-" "Java/19" 235 0.069 [mandelbrot-process-service-80] [] 10.1.5.60:8080 2600999 0.069 200 50145b36dff8b913fdd17d556bbd083c
+10.1.5.3 - - [15/Dec/2023:01:47:13 +0000] "GET /api/v1/generate-mandelbrot-tile?size=512&xc=-0.5&yc=0.5&scale=1.0&iterations=256 HTTP/1.1" 200 2327997 "-" "Java/19" 235 0.311 [mandelbrot-process-service-80] [] 10.1.5.61:8080 2326010 0.311 200 a124a16941e68031c5e9b986c5b0a54b
+10.1.5.3 - - [15/Dec/2023:01:47:13 +0000] "GET /api/v1/generate-mandelbrot-tile?size=512&xc=-1.5&yc=-0.5&scale=1.0&iterations=256 HTTP/1.1" 200 2560628 "-" "Java/19" 236 0.031 [mandelbrot-process-service-80] [] 10.1.5.53:8080 2558443 0.031 200 83b0c3629c67d5e95600e13d58fe40f1
+10.1.5.3 - - [15/Dec/2023:01:47:14 +0000] "GET /api/v1/generate-mandelbrot-tile?size=512&xc=-0.5&yc=-0.5&scale=1.0&iterations=256 HTTP/1.1" 200 2199049 "-" "Java/19" 236 0.327 [mandelbrot-process-service-80] [] 10.1.5.54:8080 2197160 0.327 200 9e11e5dfd75ee415597097a997de5a19
+```
 
+0.069 + 0.311 + 0.031 + 0.327 = 0.738
+
+![img.png](../images/ingress-example.png)
 
