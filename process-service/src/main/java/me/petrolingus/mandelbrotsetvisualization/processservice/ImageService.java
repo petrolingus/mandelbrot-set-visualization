@@ -52,8 +52,21 @@ public class ImageService {
                                                                      @RequestParam(defaultValue = "-1") double xc,
                                                                      @RequestParam(defaultValue = "0") double yc,
                                                                      @RequestParam(defaultValue = "2") double scale,
-                                                                     @RequestParam(defaultValue = "128") int iterations
+                                                                     @RequestParam(defaultValue = "128") int iterations,
+                                                                     @RequestParam(defaultValue = "-1") int breakdownProbabilityParam,
+                                                                     @RequestParam(defaultValue = "-1") int badGatewayParam,
+                                                                     @RequestParam(defaultValue = "-1") int timeoutProbabilityParam
     ) throws InterruptedException {
+
+        if (breakdownProbabilityParam > 0) {
+            this.breakdownProbability = breakdownProbabilityParam;
+        }
+        if (badGatewayParam > 0) {
+            this.badGatewayProbability = badGatewayParam;
+        }
+        if (timeoutProbabilityParam > 0) {
+            this.timeoutProbability = timeoutProbabilityParam;
+        }
 
 //        log.info("Running /api/v1/generate-mandelbrot-tile?size={}&xc={}&yc={}&scale={}&iterations={}", size, xc, yc, scale, iterations);
 

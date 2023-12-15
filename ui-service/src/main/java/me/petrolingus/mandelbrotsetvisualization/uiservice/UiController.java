@@ -37,6 +37,15 @@ public class UiController {
     @Value("#{environment['RETRY_DELAY']?:'10'}")
     private int retryDelay;
 
+    private final String viaServiceEndpoint = "http://process-service";
+    private final String viaIngressEndpoint = "http://ingress-nginx-controller.ingress-nginx";
+    public int selectedEndpoint = -1;
+
+    public int breakdownProbabilityParam = -1;
+    public int badGatewayParam = -1;
+    public int timeoutProbabilityParam = -1;
+
+
     public UiController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
@@ -125,12 +134,22 @@ public class UiController {
     }
 
     private String urlGenerator(int size, double xc, double yc, double scale, int iterations) {
+
+        if (selectedEndpoint == 0) {
+            this.processServiceUrl = viaServiceEndpoint;
+        } else if (selectedEndpoint == 1) {
+            this.processServiceUrl = viaIngressEndpoint;
+        }
+
         return processServiceUrl +
                 "/api/v1/generate-mandelbrot-tile" +
                 "?size=" + size +
                 "&xc=" + xc +
                 "&yc=" + yc +
                 "&scale=" + scale +
-                "&iterations=" + iterations;
+                "&iterations=" + iterations +
+                "&breakdownProbabilityParam=" + breakdownProbabilityParam +
+                "&badGatewayParam=" + badGatewayParam +
+                "&timeoutProbabilityParam=" + timeoutProbabilityParam;
     }
 }
