@@ -34,7 +34,7 @@ public class UiController {
     @Value("#{environment['PROCESS_SERVICE']?:'http://localhost:80'}")
     private String processServiceUrl;
 
-    @Value("#{environment['RETRY_DELAY']?:'100'}")
+    @Value("#{environment['RETRY_DELAY']?:'10'}")
     private int retryDelay;
 
     public UiController(RestTemplate restTemplate) {
@@ -98,8 +98,7 @@ public class UiController {
                             image.setRGB(x, y, tileSize, tileSize, pixels, 0, tileSize);
                             break;
                         } catch (Throwable e) {
-//                            TimeUnit.MILLISECONDS.sleep(retryDelay);
-                            Thread.onSpinWait();
+                            TimeUnit.MILLISECONDS.sleep(retryDelay);
                         }
                     }
                     return null;

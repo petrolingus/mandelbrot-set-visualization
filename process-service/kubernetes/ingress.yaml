@@ -8,6 +8,8 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout http_502 http_503 http_504"
     nginx.ingress.kubernetes.io/proxy-next-upstream-tries: "0"
     nginx.ingress.kubernetes.io/proxy-next-upstream-timeout: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "100ms"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "100ms"
 #    nginx.ingress.kubernetes.io/upstream-keepalive-requests: "1000000"
 #    nginx.ingress.kubernetes.io/max-worker-connections: "0"
 spec:
