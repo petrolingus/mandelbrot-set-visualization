@@ -36,48 +36,57 @@ public class TestController {
                                   @RequestParam(defaultValue = "10") int imageCount,
                                   @RequestParam(defaultValue = "512") int warmup,
                                   @RequestParam(defaultValue = "30000") int pauseBetweenImages,
-                                  @RequestParam(defaultValue = "30000") int pauseBetweenExperiments
+                                  @RequestParam(defaultValue = "30000") int pauseBetweenExperiments,
+                                  @RequestParam(defaultValue = "false") boolean breakdownEnable,
+                                  @RequestParam(defaultValue = "false") boolean timeoutEnable,
+                                  @RequestParam(defaultValue = "false") boolean badGatewayEnable
     ) throws IOException, InterruptedException {
 
         log.info("Start performance test...");
 
         log.info("Test with Service");
         uiController.selectedEndpoint = 0;
-        lab(size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, pauseBetweenExperiments);
+        lab(size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, pauseBetweenExperiments, breakdownEnable, timeoutEnable, badGatewayEnable);
 
         log.info("Test with Ingress");
         uiController.selectedEndpoint = 1;
-        lab(size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, pauseBetweenExperiments);
+        lab(size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, pauseBetweenExperiments, breakdownEnable, timeoutEnable, badGatewayEnable);
 
         log.info("Done performance test!");
         return "Done performance test!";
     }
 
-    private void lab(int size, double xc, double yc, double scale, int iterations, int subdivision, int executors, int imageCount, int pauseBetweenImages, int pauseBetweenExperiments) throws IOException, InterruptedException {
+    private void lab(int size, double xc, double yc, double scale, int iterations, int subdivision, int executors, int imageCount, int pauseBetweenImages, int pauseBetweenExperiments, boolean breakdownEnable, boolean timeoutEnable, boolean badGatewayEnable) throws IOException, InterruptedException {
 
-        log.info("Start experiment [pod restart]...");
-        for (int i = 0; i < 11; i++) {
-            uiController.breakdownProbabilityParam = i;
-            experiment(size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, i);
-            Thread.sleep(pauseBetweenExperiments);
+        if (breakdownEnable) {
+            log.info("Start experiment [pod restart]...");
+            for (int i = 0; i < 11; i++) {
+                uiController.breakdownProbabilityParam = i;
+                experiment(size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, i);
+                Thread.sleep(pauseBetweenExperiments);
+            }
+            uiController.breakdownProbabilityParam = -1;
         }
-        uiController.breakdownProbabilityParam = -1;
 
-        log.info("Start experiment [timeout]...");
-        for (int i = 0; i < 11; i++) {
-            uiController.timeoutProbabilityParam = i;
-            experiment(size, xc, yc, scale, iterations, subdivision, executors, imageCount, 1, i);
-            Thread.sleep(1);
+        if (timeoutEnable) {
+            log.info("Start experiment [timeout]...");
+            for (int i = 0; i < 11; i++) {
+                uiController.timeoutProbabilityParam = i;
+                experiment(size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, i);
+                Thread.sleep(pauseBetweenExperiments);
+            }
+            uiController.timeoutProbabilityParam = -1;
         }
-        uiController.timeoutProbabilityParam = -1;
 
-        log.info("Start experiment [bad gateway]...");
-        for (int i = 0; i < 11; i++) {
-            uiController.badGatewayParam = i;
-            experiment(size, xc, yc, scale, iterations, subdivision, executors, imageCount, 1, i);
-            Thread.sleep(1);
+        if (badGatewayEnable) {
+            log.info("Start experiment [bad gateway]...");
+            for (int i = 0; i < 11; i++) {
+                uiController.badGatewayParam = i;
+                experiment(size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, i);
+                Thread.sleep(pauseBetweenExperiments);
+            }
+            uiController.badGatewayParam = -1;
         }
-        uiController.badGatewayParam = -1;
     }
 
     private void experiment(int size, double xc, double yc, double scale, int iterations, int subdivision, int executors, int imageCount, int pauseBetweenImages, int err) throws IOException, InterruptedException {
@@ -93,11 +102,13 @@ public class TestController {
             Thread.sleep(pauseBetweenImages);
         }
 
+        double min = measures.stream().mapToDouble(Long::doubleValue).min().orElse(-1);
+        double max = measures.stream().mapToDouble(Long::doubleValue).max().orElse(-1);
         double average = measures.stream().mapToDouble(Long::doubleValue).average().orElse(-1);
         double median = measures.stream().sorted().toList().get(imageCount / 2);
         double p95 = measures.stream().sorted().toList().get((int) Math.round(imageCount * 0.95) - 1);
 
-        log.info("Result of test: err={}, avg={} ms, mean={} ms, p95={}", err, average, median, p95);
+        log.info("Result of test: err={}, avg={} ms, mean={} ms, p95={}, min={}, max={}", err, average, median, p95, min, max);
     }
 
 }
