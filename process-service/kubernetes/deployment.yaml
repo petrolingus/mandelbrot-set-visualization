@@ -20,7 +20,7 @@ spec:
           imagePullPolicy: Always
           env:
             - name: BREAKDOWN_PROBABILITY
-              value: '10'
+              value: '-1'
             - name: BAD_GATEWAY_PROBABILITY
               value: '-1'
             - name: TIMEOUT_PROBABILITY
