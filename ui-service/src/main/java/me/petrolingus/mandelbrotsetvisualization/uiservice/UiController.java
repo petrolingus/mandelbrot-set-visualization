@@ -37,6 +37,8 @@ public class UiController {
     @Value("#{environment['RETRY_DELAY']?:'10'}")
     private int retryDelay;
 
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
+
     private final String viaServiceEndpoint = "http://process-service";
     private final String viaIngressEndpoint = "http://ingress-nginx-controller.ingress-nginx";
     public int selectedEndpoint = -1;
@@ -81,7 +83,7 @@ public class UiController {
         final int tileSize = size / tilesInRow;
         final double tileScale = scale / tilesInRow;
 
-        ExecutorService WORKER_THREAD_POOL = Executors.newFixedThreadPool(executors);
+//        ExecutorService WORKER_THREAD_POOL = Executors.newFixedThreadPool(executors);
 
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 
@@ -119,7 +121,8 @@ public class UiController {
         }
 
         // Execute all requests
-        WORKER_THREAD_POOL.invokeAll(tasks);
+//        WORKER_THREAD_POOL.invokeAll(tasks);
+        EXECUTOR_SERVICE.invokeAll(tasks);
 
         // Log results
 //        log.info("Chunks count: {}", (tilesInRow * tilesInRow));
