@@ -66,16 +66,16 @@ public class TestController {
         log.info("Start experiment [timeout]...");
         for (int i = 0; i < 11; i++) {
             uiController.timeoutProbabilityParam = i;
-            experiment(size, xc, yc, scale, iterations, subdivision, executors, imageCount, 1000, i);
-            Thread.sleep(1000);
+            experiment(size, xc, yc, scale, iterations, subdivision, executors, imageCount, 1, i);
+            Thread.sleep(1);
         }
         uiController.timeoutProbabilityParam = -1;
 
         log.info("Start experiment [bad gateway]...");
         for (int i = 0; i < 11; i++) {
             uiController.badGatewayParam = i;
-            experiment(size, xc, yc, scale, iterations, subdivision, executors, imageCount, 1000, i);
-            Thread.sleep(1000);
+            experiment(size, xc, yc, scale, iterations, subdivision, executors, imageCount, 1, i);
+            Thread.sleep(1);
         }
         uiController.badGatewayParam = -1;
     }
