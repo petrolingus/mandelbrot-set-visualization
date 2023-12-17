@@ -39,18 +39,24 @@ public class TestController {
                                   @RequestParam(defaultValue = "30000") int pauseBetweenExperiments,
                                   @RequestParam(defaultValue = "false") boolean breakdownEnable,
                                   @RequestParam(defaultValue = "false") boolean timeoutEnable,
-                                  @RequestParam(defaultValue = "false") boolean badGatewayEnable
+                                  @RequestParam(defaultValue = "false") boolean badGatewayEnable,
+                                  @RequestParam(defaultValue = "false") boolean viaService,
+                                  @RequestParam(defaultValue = "false") boolean viaIngress
     ) throws IOException, InterruptedException {
 
         log.info("Start performance test...");
 
-        log.info("Test with Service");
-        uiController.selectedEndpoint = 0;
-        lab(size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, pauseBetweenExperiments, breakdownEnable, timeoutEnable, badGatewayEnable);
+        if (viaService) {
+            log.info("Test with Service");
+            uiController.selectedEndpoint = 0;
+            lab(size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, pauseBetweenExperiments, breakdownEnable, timeoutEnable, badGatewayEnable);
+        }
 
-        log.info("Test with Ingress");
-        uiController.selectedEndpoint = 1;
-        lab(size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, pauseBetweenExperiments, breakdownEnable, timeoutEnable, badGatewayEnable);
+        if (viaIngress) {
+            log.info("Test with Ingress");
+            uiController.selectedEndpoint = 1;
+            lab(size, xc, yc, scale, iterations, subdivision, executors, imageCount, pauseBetweenImages, pauseBetweenExperiments, breakdownEnable, timeoutEnable, badGatewayEnable);
+        }
 
         log.info("Done performance test!");
         return "Done performance test!";
